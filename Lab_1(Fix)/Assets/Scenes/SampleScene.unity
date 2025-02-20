@@ -870,12 +870,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isGrounded: 1
   checkGroundOffsetY: -1.01
-  checkGroundRadius: 0.3
+  checkGroundRadius: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   speed: 0.5
-  jumpForce: 4
+  jumpForce: 5
   animator: {fileID: 1393153655}
 --- !u!4 &1393153653
 Transform:

@@ -6,6 +6,9 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private float HorizontalMove = 0f;
+    
+    private bool FacingRight = false;
+    private bool FacingLeft = false;
 
     [Space]
     public bool isGrounded = false;
@@ -34,20 +37,31 @@ public class PlayerController : MonoBehaviour
 
         animator.SetFloat("HorizontalMove", Mathf.Abs(HorizontalMove));
 
-        if (isGrounded == false)
+        if (HorizontalMove < 0 && FacingRight)
         {
-            animator.SetBool("Jumping", true);
+            Flip();
         }
-        else
+        else if (HorizontalMove > 0 && !FacingRight)
         {
-            animator.SetBool("Jumping", false);
+            Flip();
         }
+
+        animator.SetBool("Jumping", !isGrounded);
+    }
+
+    private void Flip()
+    {
+        FacingRight = !FacingRight;
+
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
     }
 
     private void FixedUpdate()
     {
-        Vector2 targetVelocity = new Vector2(HorizontalMove * 10f, rb.velocity.y);
-        rb.velocity = targetVelocity;
+
+        rb.velocity = new Vector2(HorizontalMove * 10f, rb.velocity.y);
 
         CheckGround();
     }
