@@ -5,25 +5,33 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
-    private float HorizontalMove = 0f;
+    private float horizontalMove = 0f;
     
-    private bool FacingRight = false;
-    private bool FacingLeft = false;
+    private bool facingRight = false;
 
     [Space]
-    public bool isGrounded = false;
-    public float checkGroundOffsetY = -1.8f;
-    public float checkGroundRadius = 0.3f;
-    public LayerMask groundLayer;
+    [SerializeField] private bool isGrounded = false;
+    [SerializeField] private float checkGroundOffsetY = -1.8f;
+    [SerializeField] private float checkGroundRadius = 0.3f;
+    [SerializeField] private LayerMask groundLayer;
 
     public float speed = 1f;
     public float jumpForce = 2f;
 
-    public Animator animator;
+    private Animator animator;
+    public bool FacingRight { get => facingRight; set => facingRight = value; }
+
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.sharedMaterial = new PhysicsMaterial2D { friction = 0f, bounciness = 0f };
+        }
     }
 
     void Update()
@@ -31,22 +39,24 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            animator.SetTrigger(horizontalMove > 0 ? "JumpRight" : "JumpLeft");
         }
 
-        HorizontalMove = Input.GetAxisRaw("Horizontal") * speed;
+        horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
 
-        animator.SetFloat("HorizontalMove", Mathf.Abs(HorizontalMove));
-
-        if (HorizontalMove < 0 && FacingRight)
-        {
-            Flip();
-        }
-        else if (HorizontalMove > 0 && !FacingRight)
-        {
-            Flip();
-        }
-
+        animator.SetFloat("HorizontalMove", Mathf.Abs(horizontalMove));
         animator.SetBool("Jumping", !isGrounded);
+
+        if (horizontalMove < 0 && FacingRight)
+        {
+            Flip();
+        }
+        else if (horizontalMove > 0 && !FacingRight)
+        {
+            Flip();
+        }
+
+        
     }
 
     private void Flip()
@@ -61,7 +71,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
 
-        rb.velocity = new Vector2(HorizontalMove * 10f, rb.velocity.y);
+        rb.linearVelocity = new Vector2(horizontalMove * 10f, rb.linearVelocity.y);
 
         CheckGround();
     }
@@ -70,4 +80,13 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius, groundLayer);
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Collectible"))
+        {
+            Destroy(other.gameObject);
+        }
+    }
+
 }
