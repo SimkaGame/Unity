@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            animator.SetTrigger(horizontalMove > 0 ? "JumpRight" : "JumpLeft");
+            animator.SetTrigger("JumpRun");
         }
 
         horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
