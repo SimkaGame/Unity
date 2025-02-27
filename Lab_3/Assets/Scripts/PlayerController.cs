@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private float horizontalMove = 0f;
-    
+
     private bool facingRight = false;
 
     [Space]
@@ -18,14 +18,14 @@ public class PlayerController : MonoBehaviour
     public float speed = 1f;
     public float jumpForce = 2f;
 
-    private Animator animator;
-    public bool FacingRight { get => facingRight; set => facingRight = value; }
+    private PlayerAnimator playerAnimator;
 
+    public bool FacingRight { get => facingRight; set => facingRight = value; }
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
+        playerAnimator = GetComponent<PlayerAnimator>();
 
         Collider2D col = GetComponent<Collider2D>();
         if (col != null)
@@ -39,13 +39,10 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            animator.SetTrigger("JumpRun");
+            playerAnimator.TriggerJump();
         }
 
         horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
-
-        animator.SetFloat("HorizontalMove", Mathf.Abs(horizontalMove));
-        animator.SetBool("Jumping", !isGrounded);
 
         if (horizontalMove < 0 && FacingRight)
         {
@@ -56,7 +53,7 @@ public class PlayerController : MonoBehaviour
             Flip();
         }
 
-        
+        playerAnimator.UpdateAnimation(horizontalMove, isGrounded, FacingRight);
     }
 
     private void Flip()
@@ -70,9 +67,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-
         rb.linearVelocity = new Vector2(horizontalMove * 10f, rb.linearVelocity.y);
-
         CheckGround();
     }
 
@@ -88,5 +83,4 @@ public class PlayerController : MonoBehaviour
             Destroy(other.gameObject);
         }
     }
-
 }
