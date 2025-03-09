@@ -17,18 +17,12 @@ public class EmeraldPickup : MonoBehaviour
         if (!isPicked)
         {
             isPicked = true;
-            Debug.Log("Анимация подбора изумруда запускается!");
 
             anim.SetTrigger("pickupTrigger");
 
             if (audioSource != null && audioSource.clip != null)
             {
                 audioSource.PlayOneShot(audioSource.clip);
-                Debug.Log("Звук подбора воспроизведен!");
-            }
-            else
-            {
-                Debug.LogWarning("AudioSource или AudioClip не установлены!");
             }
 
 
