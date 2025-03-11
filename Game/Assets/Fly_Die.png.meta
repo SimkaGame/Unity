@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 15659ec0b079bf049900036eca5a3c97
+guid: e016a7e939174a24389ae08226951278
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -427066485589525634
-    second: Fly_0
+      213: -728629749200496792
+    second: Fly_Die_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -53,7 +53,7 @@ TextureImporter:
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 161
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 0
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -72,10 +72,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fly_0
+      name: Fly_Die_0
       rect:
         serializedVersion: 2
         x: 89
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e7b36f64b41c21af0800000000000000
-      internalID: -427066485589525634
+      spriteID: 8675f128a1363e5f0800000000000000
+      internalID: -728629749200496792
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fly_0: -427066485589525634
+      Fly_Die_0: -728629749200496792
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
