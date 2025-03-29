@@ -11,11 +11,6 @@ public class PlayerAnimator : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public void TriggerJump()
-    {
-        animator.SetTrigger("JumpRun");
-    }
-
     public void UpdateAnimation(float horizontalMove, bool isGrounded, bool facingRight)
     {
         animator.SetFloat("HorizontalMove", Mathf.Abs(horizontalMove));
