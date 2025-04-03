@@ -6,7 +6,6 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private float horizontalMove = 0f;
-
     private bool facingRight = false;
 
     [Space]
@@ -20,6 +19,8 @@ public class PlayerController : MonoBehaviour
 
     private PlayerAnimator playerAnimator;
 
+    public float HorizontalMove => horizontalMove;
+    public bool IsGrounded => isGrounded;
     public bool FacingRight { get => facingRight; set => facingRight = value; }
 
     void Start()
@@ -58,7 +59,6 @@ public class PlayerController : MonoBehaviour
     private void Flip()
     {
         FacingRight = !FacingRight;
-
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
         transform.localScale = theScale;
@@ -85,5 +85,11 @@ public class PlayerController : MonoBehaviour
                 emerald.TriggerPickupAnimation();
             }
         }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius);
     }
 }
