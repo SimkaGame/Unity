@@ -4,6 +4,12 @@ public class Checkpoint : MonoBehaviour
 {
     public Animator animator;
     private bool isActive = false;
+    
+    private void Start()
+{
+
+}
+
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -23,6 +29,8 @@ public class Checkpoint : MonoBehaviour
         }
 
         CheckpointManager.Instance.SetCheckpoint(transform.position);
+
+        gameObject.SetActive(false);
     }
 
     public void Deactivate()
