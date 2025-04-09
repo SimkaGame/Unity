@@ -5,6 +5,7 @@ public class CheckpointManager : MonoBehaviour
     public static CheckpointManager Instance;
 
     private Vector3 lastCheckpointPosition = Vector3.zero;
+    private Vector3 spawnOffset = new Vector3(0, 0.5f, 0);
 
     private void Awake()
     {
@@ -35,6 +36,6 @@ public class CheckpointManager : MonoBehaviour
 
     public Vector3 GetLastCheckpointPosition()
     {
-        return lastCheckpointPosition;
+        return lastCheckpointPosition + spawnOffset;
     }
 }

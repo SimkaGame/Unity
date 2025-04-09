@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -23,6 +21,8 @@ public class PlayerController : MonoBehaviour
     public bool IsGrounded => isGrounded;
     public bool FacingRight { get => facingRight; set => facingRight = value; }
 
+    public bool isMovingRight = true;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -43,6 +43,15 @@ public class PlayerController : MonoBehaviour
         }
 
         horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
+
+        if (horizontalMove > 0)
+        {
+            isMovingRight = true;
+        }
+        else if (horizontalMove < 0)
+        {
+            isMovingRight = false;
+        }
 
         if (horizontalMove < 0 && FacingRight)
         {

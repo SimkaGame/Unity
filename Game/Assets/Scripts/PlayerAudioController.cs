@@ -15,7 +15,6 @@ public class PlayerAudioController : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         if (playerController == null)
         {
-            Debug.LogError("PlayerAudioController требует PlayerController на том же объекте!");
             return;
         }
 
@@ -25,8 +24,8 @@ public class PlayerAudioController : MonoBehaviour
             enabled = false;
             return;
         }
-        walkAudioSource = sources[0]; //Для ходьбы
-        landAudioSource = sources[1]; //Для приземления
+        walkAudioSource = sources[0];
+        landAudioSource = sources[1];
 
         wasGrounded = playerController.IsGrounded;
     }

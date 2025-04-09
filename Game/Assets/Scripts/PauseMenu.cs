@@ -54,11 +54,11 @@ public class PauseMenu : MonoBehaviour
 
     public void ExitGame()
 {
-    Application.Quit(); // Закрывает игру в сборке
+    Application.Quit();
     #if UNITY_EDITOR
-    UnityEditor.EditorApplication.isPlaying = false; // Завершает игру в редакторе
+    UnityEditor.EditorApplication.isPlaying = false;
     #endif
-    Debug.Log("Выход из игры"); // Чтобы видеть в консоли
+    Debug.Log("Выход из игры");
 }
     void SetMasterVolume(float volume)
     {

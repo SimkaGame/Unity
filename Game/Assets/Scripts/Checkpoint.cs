@@ -3,7 +3,7 @@ using UnityEngine;
 public class Checkpoint : MonoBehaviour
 {
     public Animator animator;
-    public GameObject checkpointTextPrefab; // Ссылка на префаб текста TextMeshPro
+    public GameObject checkpointTextPrefab;
     private bool isActive = false;
 
     private void Start()
@@ -28,10 +28,9 @@ public class Checkpoint : MonoBehaviour
 
         CheckpointManager.Instance.SetCheckpoint(transform.position);
 
-        // Создаем текст над персонажем
         if (checkpointTextPrefab != null)
         {
-            Vector3 spawnPosition = playerTransform.position + Vector3.up * 1.5f; // Позиция над персонажем
+            Vector3 spawnPosition = playerTransform.position + Vector3.up * 1.5f;
             Instantiate(checkpointTextPrefab, spawnPosition, Quaternion.identity);
         }
 
