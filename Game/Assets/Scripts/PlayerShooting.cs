@@ -5,19 +5,12 @@ public class PlayerShooting : MonoBehaviour
 {
     [Header("Настройка стрельбы")]
     public GameObject arrowPrefab;
-    public Transform firePointLeft;
-    public Transform firePointRight;
     public float fireRate = 1f;
-    public float arrowSpeed = 10f;
+    public float arrowSpeed = 20f;
+    public float fireOffset = 0.8f;
+    public float fireHeightOffset = 0.4f;
 
     private bool canShoot = true;
-    private bool facingRight = true;
-    private PlayerController playerController;
-
-    void Start()
-    {
-        playerController = GetComponent<PlayerController>();
-    }
 
     void Update()
     {
@@ -41,20 +34,24 @@ public class PlayerShooting : MonoBehaviour
 
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
-        Vector2 direction = (mouseWorldPos - firePointRight.position).normalized;
 
-        if (playerController.isMovingRight)
+        Vector2 spawnPosition;
+        Vector2 direction = (mouseWorldPos - transform.position).normalized;
+
+        if (mouseWorldPos.x < transform.position.x)
         {
-            direction = (mouseWorldPos - firePointRight.position).normalized;
+            spawnPosition = new Vector2(transform.position.x - fireOffset, transform.position.y + fireHeightOffset);
         }
         else
         {
-            direction = (mouseWorldPos - firePointLeft.position).normalized;
+            spawnPosition = new Vector2(transform.position.x + fireOffset, transform.position.y + fireHeightOffset);
         }
 
-        Vector2 spawnPosition = playerController.isMovingRight ? firePointRight.position : firePointLeft.position;
-
         GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.identity);
+        if (arrow == null)
+        {
+            yield break;
+        }
 
         Rigidbody2D arrowRb = arrow.GetComponent<Rigidbody2D>();
         if (arrowRb != null)
@@ -76,10 +73,5 @@ public class PlayerShooting : MonoBehaviour
 
         yield return new WaitForSeconds(fireRate);
         canShoot = true;
-    }
-
-    public void SetFacingRight(bool isFacingRight)
-    {
-        facingRight = isFacingRight;
     }
 }
