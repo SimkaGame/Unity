@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     public float speed = 1f;
+    private float originalSpeed;
     public float jumpForce = 2f;
 
     private PlayerAnimator playerAnimator;
@@ -27,6 +28,8 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<PlayerAnimator>();
+
+        originalSpeed = speed;
 
         Collider2D col = GetComponent<Collider2D>();
         if (col != null)
@@ -65,7 +68,7 @@ public class PlayerController : MonoBehaviour
         playerAnimator.UpdateAnimation(horizontalMove, isGrounded, FacingRight);
     }
 
-    private void Flip()
+    public void Flip()
     {
         FacingRight = !FacingRight;
         Vector3 theScale = transform.localScale;
@@ -96,9 +99,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnDrawGizmosSelected()
+    public void SlowDown(float slowFactor)
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius);
+        speed = originalSpeed * slowFactor;
+    }
+
+    public void RestoreSpeed()
+    {
+        speed = originalSpeed;
     }
 }

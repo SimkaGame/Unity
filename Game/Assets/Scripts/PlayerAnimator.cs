@@ -16,4 +16,9 @@ public class PlayerAnimator : MonoBehaviour
         animator.SetFloat("HorizontalMove", Mathf.Abs(horizontalMove));
         animator.SetBool("Jumping", !isGrounded);
     }
+
+    public void SetShooting(bool isShooting)
+    {
+        animator.SetBool("IsShooting", isShooting);
+    }
 }
