@@ -1,68 +1,131 @@
 using UnityEngine;
+using System.Collections;
 
 public class MusicPlayer : MonoBehaviour
 {
-    private AudioSource audioSource;
     [SerializeField] private AudioClip[] musicTracks;
-    private int currentTrackIndex = 0;
-    private float delayBeforePlay = 5f;
-    private float fadeTime = 2f;
-    private float maxVolume = 1f;
+    [SerializeField] private float fadeTime = 2f;
+    [SerializeField] private float maxVolume = 1f;
+    [SerializeField] private float delayBeforePlay = 5f;
+
+    private AudioSource sourceA;
+    private AudioSource sourceB;
+    private AudioSource currentSource;
+    private AudioSource nextSource;
+    private int currentIndex = -1;
+    private bool isFading = false;
+
+    void Awake()
+    {
+        sourceA = gameObject.AddComponent<AudioSource>();
+        sourceB = gameObject.AddComponent<AudioSource>();
+        sourceA.playOnAwake = false;
+        sourceB.playOnAwake = false;
+        sourceA.loop = false;
+        sourceB.loop = false;
+
+        currentSource = sourceA;
+        nextSource = sourceB;
+    }
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null || musicTracks.Length == 0)
-            return;
-
-        audioSource.volume = 0f;
-        Invoke("PlayMusic", delayBeforePlay);
-    }
-
-    void PlayMusic()
-    {
-        if (audioSource == null || musicTracks.Length == 0)
-            return;
-
-        audioSource.clip = musicTracks[currentTrackIndex];
-        audioSource.loop = false;
-        audioSource.Play();
-
-        StartCoroutine(FadeIn());
-        Invoke("PrepareNextTrack", musicTracks[currentTrackIndex].length - fadeTime);
-    }
-
-    void PrepareNextTrack()
-    {
-        StartCoroutine(FadeOutAndSwitch());
-    }
-
-    System.Collections.IEnumerator FadeIn()
-    {
-        float elapsedTime = 0f;
-        while (elapsedTime < fadeTime)
+        if (musicTracks == null || musicTracks.Length == 0)
         {
-            elapsedTime += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(0f, maxVolume, elapsedTime / fadeTime);
+            return;
+        }
+
+        maxVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        SetVolume(maxVolume);
+        Invoke(nameof(PlayNextTrack), delayBeforePlay);
+    }
+
+    void PlayNextTrack()
+    {
+        if (musicTracks.Length == 0 || isFading) return;
+
+        int nextIndex;
+        do
+        {
+            nextIndex = Random.Range(0, musicTracks.Length);
+        } while (musicTracks.Length > 1 && nextIndex == currentIndex);
+
+        currentIndex = nextIndex;
+
+        if (nextSource != null)
+        {
+            nextSource.clip = musicTracks[currentIndex];
+            nextSource.volume = 0f;
+            nextSource.Play();
+        }
+
+        StartCoroutine(Crossfade(currentSource, nextSource));
+
+        float trackLength = musicTracks[currentIndex].length;
+        float nextDelay = trackLength - fadeTime;
+        if (nextDelay < 0)
+        {
+            nextDelay = trackLength * 0.9f;
+        }
+        Invoke(nameof(PlayNextTrack), nextDelay);
+    }
+
+    IEnumerator Crossfade(AudioSource from, AudioSource to)
+    {
+        if (from == null || to == null)
+        {
+            isFading = false;
+            yield break;
+        }
+
+        isFading = true;
+        float t = 0f;
+        float startVolumeFrom = from.volume;
+        while (t < fadeTime)
+        {
+            t += Time.unscaledDeltaTime;
+            float normalized = t / fadeTime;
+            if (from != null)
+                from.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
+            if (to != null)
+                to.volume = Mathf.Lerp(0f, maxVolume, normalized);
             yield return null;
         }
-        audioSource.volume = maxVolume;
+
+        if (from != null)
+        {
+            from.Stop();
+            from.volume = 0f;
+        }
+        if (to != null)
+        {
+            to.volume = maxVolume;
+        }
+
+        var temp = currentSource;
+        currentSource = to;
+        nextSource = temp;
+
+        isFading = false;
     }
 
-    System.Collections.IEnumerator FadeOutAndSwitch()
+    public void SetVolume(float volume)
     {
-        float elapsedTime = 0f;
-        float startVolume = audioSource.volume;
-
-        while (elapsedTime < fadeTime)
+        maxVolume = Mathf.Clamp01(volume);
+        if (currentSource != null && !isFading)
         {
-            elapsedTime += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(startVolume, 0f, elapsedTime / fadeTime);
-            yield return null;
+            currentSource.volume = maxVolume;
         }
-        audioSource.volume = 0f;
+        if (nextSource != null && !isFading)
+        {
+            nextSource.volume = 0f;
+        }
+        PlayerPrefs.SetFloat("MusicVolume", maxVolume);
+        PlayerPrefs.Save();
+    }
 
-        currentTrackIndex = Random.Range(0, musicTracks.Length);
-        PlayMusic();
+    public float GetVolume()
+    {
+        return maxVolume;
     }
 }

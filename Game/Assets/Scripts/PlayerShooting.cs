@@ -23,6 +23,7 @@ public class PlayerShooting : MonoBehaviour
     private PlayerAnimator playerAnimator;
     private PlayerController playerController;
     private float initialBowAngle;
+    private bool wasBowEnabled;
 
     void Start()
     {
@@ -38,14 +39,39 @@ public class PlayerShooting : MonoBehaviour
 
         playerAnimator = GetComponent<PlayerAnimator>();
         playerController = GetComponent<PlayerController>();
-        initialBowAngle = bowTransform.localEulerAngles.z;
+        initialBowAngle = bowTransform != null ? bowTransform.localEulerAngles.z : 0f;
     }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && canShoot)
+        if (Input.GetMouseButtonDown(0) && canShoot && !PauseMenu.IsPaused())
         {
             StartCoroutine(ShootCoroutine());
+        }
+    }
+
+    public void OnPause()
+    {
+        wasBowEnabled = bowSpriteRenderer != null && bowSpriteRenderer.enabled;
+        if (bowSpriteRenderer != null)
+        {
+            bowSpriteRenderer.enabled = false;
+        }
+        if (bowAnimator != null)
+        {
+            bowAnimator.enabled = false;
+        }
+    }
+
+    public void OnResume()
+    {
+        if (bowSpriteRenderer != null)
+        {
+            bowSpriteRenderer.enabled = wasBowEnabled;
+        }
+        if (bowAnimator != null && wasBowEnabled)
+        {
+            bowAnimator.enabled = true;
         }
     }
 
@@ -56,7 +82,6 @@ public class PlayerShooting : MonoBehaviour
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
         Vector2 direction = (mouseWorldPos - transform.position).normalized;
-
 
         if (playerController != null)
         {
