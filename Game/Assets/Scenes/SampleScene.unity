@@ -1581,6 +1581,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 470831444}
+  - component: {fileID: 470831445}
   - component: {fileID: 470831443}
   m_Layer: 0
   m_Name: Ambient
@@ -1599,8 +1600,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 3bb76632aac02a1408e5c86f81b2e3cc, type: 3}
-  m_Resource: {fileID: 8300000, guid: 3bb76632aac02a1408e5c86f81b2e3cc, type: 3}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 0.476
   m_Pitch: 1
@@ -1701,6 +1702,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &470831445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470831442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad1531cc6a473fe43bb1e925d0451f4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windClip: {fileID: 8300000, guid: 5c67df124fb65cb44b342d6ec741a67b, type: 3}
+  maxVolume: 1
+  fadeTime: 1
 --- !u!1 &515718220
 GameObject:
   m_ObjectHideFlags: 0
@@ -2349,6 +2365,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 641978586efc9d34e9c08d70ac497a02, type: 3}
   - {fileID: 8300000, guid: 32238f2e47bbc9943bc42cd1b786c5d7, type: 3}
   - {fileID: 8300000, guid: c3c3e76501350d14181a089dbf58ec3f, type: 3}
+  fadeTime: 2
+  maxVolume: 1
+  delayBeforePlay: 5
 --- !u!1 &642034795
 GameObject:
   m_ObjectHideFlags: 0
@@ -3540,7 +3559,6 @@ MonoBehaviour:
   menuPanel: {fileID: 283841275}
   masterVolumeSlider: {fileID: 176103732}
   musicVolumeSlider: {fileID: 517632700}
-  musicSource: {fileID: 634469041}
 --- !u!114 &1284098884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3634,6 +3652,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1393153653}
   - component: {fileID: 1393153652}
+  - component: {fileID: 1393153664}
   - component: {fileID: 1393153662}
   - component: {fileID: 1393153663}
   - component: {fileID: 1393153651}
@@ -4090,6 +4109,20 @@ MonoBehaviour:
   maxHealth: 10
   heartPrefab: {fileID: 6608547369996990887, guid: 7f49a9aefc7548e478a179953885d3f9, type: 3}
   heartsContainer: {fileID: 922355180}
+--- !u!114 &1393153664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1393153649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaa7b0e8e7bca5f408e6104e99f7a5a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 1
 --- !u!1 &1431055215
 GameObject:
   m_ObjectHideFlags: 0
@@ -5575,7 +5608,7 @@ Transform:
   m_GameObject: {fileID: 1791139730}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.89, y: 1.23, z: -0.0000000037253}
+  m_LocalPosition: {x: -5.94, y: 1.16, z: -0.0000000037253}
   m_LocalScale: {x: 0.46843666, y: 0.3980288, z: 0.10023895}
   m_ConstrainProportionsScale: 0
   m_Children: []

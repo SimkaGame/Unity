@@ -1,28 +1,46 @@
 using UnityEngine;
+using System.Collections;
 
 public class DeathZone : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
+        if (!other.CompareTag("Player")) return;
 
-            Animator playerAnimator = other.GetComponent<Animator>();
-            if (playerAnimator != null)
-            {
-                playerAnimator.SetTrigger("IsDead");
-            }
-            StartCoroutine(RespawnPlayerWithDelay(other));
+        DamageFlash flash = other.GetComponent<DamageFlash>();
+        if (flash != null)
+        {
+            flash.PlayFlash();
         }
+
+        StartCoroutine(RespawnPlayer(other));
     }
 
-    private System.Collections.IEnumerator RespawnPlayerWithDelay(Collider2D player)
+    private IEnumerator RespawnPlayer(Collider2D player)
     {
         yield return new WaitForSeconds(0.2f);
+
         if (CheckpointManager.Instance != null)
         {
-            Vector3 respawnPosition = CheckpointManager.Instance.GetLastCheckpointPosition();
-            player.transform.position = respawnPosition;
+            Vector3 checkpoint = CheckpointManager.Instance.GetLastCheckpointPosition();
+
+            Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                player.transform.position = checkpoint;
+            }
+            else
+            {
+                player.transform.position = checkpoint;
+            }
+        }
+
+        // Восстановление здоровья
+        PlayerHealth health = player.GetComponent<PlayerHealth>();
+        if (health != null)
+        {
+            health.ResetHealth();
         }
     }
 }

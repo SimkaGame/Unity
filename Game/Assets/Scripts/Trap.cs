@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Trap : MonoBehaviour
 {
-    public int damage = 1; // Урон от ловушки
-    public float damageCooldown = 1f; // Перезарядка урона
+    public int damage = 1;
+    public float damageCooldown = 1f;
     private float lastDamageTime;
 
     private void OnTriggerStay2D(Collider2D other)
@@ -15,6 +15,13 @@ public class Trap : MonoBehaviour
             {
                 playerHealth.TakeDamage(damage);
                 lastDamageTime = Time.time;
+
+                // 🔥 Вспышка урона
+                DamageFlash flash = other.GetComponent<DamageFlash>();
+                if (flash != null)
+                {
+                    flash.PlayFlash();
+                }
             }
         }
     }

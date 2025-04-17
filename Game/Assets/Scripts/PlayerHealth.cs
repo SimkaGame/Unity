@@ -63,4 +63,10 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         UpdateHearts();
     }
+
+    public void ResetHealth()
+    {
+        currentHealth = maxHealth;
+        UpdateHearts();
+    }
 }

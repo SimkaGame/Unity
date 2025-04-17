@@ -36,11 +36,6 @@ public class CheckpointManager : MonoBehaviour
 
     public Vector3 GetLastCheckpointPosition()
     {
-        // Проверка на ненулевую позицию чекпоинта
-        if (lastCheckpointPosition == Vector3.zero)
-        {
-            return GameObject.FindGameObjectWithTag("Player").transform.position + spawnOffset;
-        }
         return lastCheckpointPosition + spawnOffset;
     }
 }
