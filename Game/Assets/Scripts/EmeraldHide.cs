@@ -21,6 +21,11 @@ public class EmeraldHide : MonoBehaviour
                 audioSource.PlayOneShot(audioSource.clip);
             }
 
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddEmerald();
+            }
+
             Invoke("DestroySelf", 0.5f);
         }
     }

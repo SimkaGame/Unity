@@ -25,8 +25,12 @@ public class EmeraldPickup : MonoBehaviour
                 audioSource.PlayOneShot(audioSource.clip);
             }
 
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddEmerald();
+            }
 
-            Invoke("DestroySelf", 0.5f); 
+            Invoke("DestroySelf", 0.5f);
         }
     }
 
@@ -37,7 +41,7 @@ public class EmeraldPickup : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && !isPicked) 
+        if (other.CompareTag("Player") && !isPicked)
         {
             TriggerPickupAnimation();
         }
