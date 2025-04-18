@@ -26,7 +26,8 @@ public class Checkpoint : MonoBehaviour
     {
         isActive = true;
 
-        CheckpointManager.Instance.SetCheckpoint(transform.position);
+        AudioSource audioSource = GetComponent<AudioSource>();
+        CheckpointManager.Instance.SetCheckpoint(transform.position, audioSource);
 
         if (checkpointTextPrefab != null)
         {

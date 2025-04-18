@@ -7,6 +7,12 @@ public class DeathZone : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
+        PlayerAudioController audioController = other.GetComponent<PlayerAudioController>();
+        if (audioController != null)
+        {
+            audioController.PlayDamageSound();
+        }
+
         DamageFlash flash = other.GetComponent<DamageFlash>();
         if (flash != null)
         {
@@ -36,7 +42,6 @@ public class DeathZone : MonoBehaviour
             }
         }
 
-        // Восстановление здоровья
         PlayerHealth health = player.GetComponent<PlayerHealth>();
         if (health != null)
         {

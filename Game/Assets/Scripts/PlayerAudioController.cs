@@ -6,6 +6,8 @@ public class PlayerAudioController : MonoBehaviour
     private AudioSource landAudioSource;
     [SerializeField] private AudioClip walkSound;
     [SerializeField] private AudioClip landSound;
+    [SerializeField] private AudioClip damageSound;
+    [SerializeField] private AudioClip shootSound;
 
     private PlayerController playerController;
     private bool wasGrounded;
@@ -15,6 +17,7 @@ public class PlayerAudioController : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         if (playerController == null)
         {
+            enabled = false;
             return;
         }
 
@@ -27,6 +30,16 @@ public class PlayerAudioController : MonoBehaviour
         walkAudioSource = sources[0];
         landAudioSource = sources[1];
 
+        if (walkSound != null)
+        {
+            walkAudioSource.clip = walkSound;
+            walkAudioSource.loop = true;
+            walkAudioSource.playOnAwake = false;
+            walkAudioSource.Stop();
+            walkAudioSource.Play();
+            walkAudioSource.Pause();
+        }
+
         wasGrounded = playerController.IsGrounded;
     }
 
@@ -37,19 +50,16 @@ public class PlayerAudioController : MonoBehaviour
         float horizontalMove = playerController.HorizontalMove;
         bool isGrounded = playerController.IsGrounded;
 
-        if (isGrounded && Mathf.Abs(horizontalMove) > 0.1f)
+        if (isGrounded && Mathf.Abs(horizontalMove) > 0.01f)
         {
-            if (!walkAudioSource.isPlaying || walkAudioSource.clip != walkSound)
+            if (!walkAudioSource.isPlaying && walkSound != null)
             {
-                walkAudioSource.clip = walkSound;
-                walkAudioSource.loop = true;
                 walkAudioSource.Play();
             }
         }
-        else if (walkAudioSource.clip == walkSound)
+        else if (walkAudioSource.isPlaying)
         {
             walkAudioSource.Stop();
-            walkAudioSource.loop = false;
         }
     }
 
@@ -64,6 +74,22 @@ public class PlayerAudioController : MonoBehaviour
             landAudioSource.PlayOneShot(landSound);
         }
         wasGrounded = isGrounded;
+    }
+
+    public void PlayDamageSound()
+    {
+        if (damageSound != null)
+        {
+            landAudioSource.PlayOneShot(damageSound);
+        }
+    }
+
+    public void PlayShootSound()
+    {
+        if (shootSound != null)
+        {
+            landAudioSource.PlayOneShot(shootSound);
+        }
     }
 
     public bool IsGrounded => playerController.IsGrounded;

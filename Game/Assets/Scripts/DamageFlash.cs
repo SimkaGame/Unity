@@ -4,7 +4,7 @@ using System.Collections;
 [RequireComponent(typeof(SpriteRenderer))]
 public class DamageFlash : MonoBehaviour
 {
-    [Header("Цвет вспышки при уроне")]
+    [Header("Цвет вспышки")]
     [SerializeField] private Color flashColor = Color.red;
 
     [Header("Длительность эффекта")]

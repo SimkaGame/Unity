@@ -20,9 +20,21 @@ public class CheckpointManager : MonoBehaviour
         }
     }
 
-    public void SetCheckpoint(Vector3 position)
+    public void SetCheckpoint(Vector3 position, AudioSource audioSource)
     {
         lastCheckpointPosition = position;
+
+        if (audioSource != null && audioSource.clip != null)
+        {
+            GameObject soundObject = new GameObject("CheckpointSound");
+            soundObject.transform.position = position;
+            AudioSource tempAudio = soundObject.AddComponent<AudioSource>();
+            tempAudio.clip = audioSource.clip;
+            tempAudio.volume = audioSource.volume;
+            tempAudio.spatialBlend = audioSource.spatialBlend;
+            tempAudio.Play();
+            Destroy(soundObject, audioSource.clip.length); 
+        }
 
         Checkpoint[] checkpoints = FindObjectsByType<Checkpoint>(FindObjectsSortMode.None);
         foreach (var checkpoint in checkpoints)

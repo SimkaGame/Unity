@@ -24,6 +24,7 @@ public class PlayerShooting : MonoBehaviour
     private PlayerController playerController;
     private float initialBowAngle;
     private bool wasBowEnabled;
+    private PlayerAudioController audioController;
 
     void Start()
     {
@@ -39,6 +40,7 @@ public class PlayerShooting : MonoBehaviour
 
         playerAnimator = GetComponent<PlayerAnimator>();
         playerController = GetComponent<PlayerController>();
+        audioController = GetComponent<PlayerAudioController>();
         initialBowAngle = bowTransform != null ? bowTransform.localEulerAngles.z : 0f;
     }
 
@@ -146,6 +148,11 @@ public class PlayerShooting : MonoBehaviour
                         Physics2D.IgnoreCollision(arrowCollider, col);
                     }
                 }
+            }
+
+            if (audioController != null)
+            {
+                audioController.PlayShootSound();
             }
         }
 

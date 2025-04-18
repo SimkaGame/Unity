@@ -2,11 +2,13 @@ using UnityEngine;
 
 public class Trap : MonoBehaviour
 {
-    public int damage = 1;
-    public float damageCooldown = 1f;
+    public int damage = 2;
+    public float damageCooldown = 0.5f;
     private float lastDamageTime;
     private bool isPlayerInTrap = false;
     private GameObject player;
+    private int soundPlayCount = 0;
+    private const int maxSoundPlays = 4;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -14,6 +16,7 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = true;
             player = other.gameObject;
+            soundPlayCount = 0;
             ApplyDamage(other);
         }
     }
@@ -24,12 +27,13 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = false;
             player = null;
+            soundPlayCount = 0;
         }
     }
 
     private void Update()
     {
-        // Проверка на кулдаун
+        // Проверка на кулдаун для урона
         if (isPlayerInTrap && Time.time - lastDamageTime >= damageCooldown && player != null)
         {
             ApplyDamage(player.GetComponent<Collider2D>());
@@ -43,6 +47,16 @@ public class Trap : MonoBehaviour
         {
             playerHealth.TakeDamage(damage);
             lastDamageTime = Time.time;
+
+            if (soundPlayCount < maxSoundPlays)
+            {
+                PlayerAudioController audioController = playerCollider.GetComponent<PlayerAudioController>();
+                if (audioController != null)
+                {
+                    audioController.PlayDamageSound();
+                    soundPlayCount++;
+                }
+            }
 
             DamageFlash flash = playerCollider.GetComponent<DamageFlash>();
             if (flash != null)
