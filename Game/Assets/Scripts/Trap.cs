@@ -7,8 +7,7 @@ public class Trap : MonoBehaviour
     private float lastDamageTime;
     private bool isPlayerInTrap = false;
     private GameObject player;
-    private int soundPlayCount = 0;
-    private const int maxSoundPlays = 4;
+    private int damageCycleCount = 0;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -16,7 +15,7 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = true;
             player = other.gameObject;
-            soundPlayCount = 0;
+            damageCycleCount = 0;
             ApplyDamage(other);
         }
     }
@@ -27,7 +26,7 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = false;
             player = null;
-            soundPlayCount = 0;
+            damageCycleCount = 0;
         }
     }
 
@@ -42,20 +41,29 @@ public class Trap : MonoBehaviour
     private void ApplyDamage(Collider2D playerCollider)
     {
         PlayerHealth playerHealth = playerCollider.GetComponent<PlayerHealth>();
-        if (playerHealth != null)
-        {
-            playerHealth.TakeDamage(damage);
-            lastDamageTime = Time.time;
+        if (playerHealth == null) return;
 
-            if (soundPlayCount < maxSoundPlays)
+        int previousHealth = playerHealth.CurrentHealth;
+        if (previousHealth <= 0)
+        {
+            isPlayerInTrap = false;
+            player = null;
+            return;
+        }
+
+        playerHealth.TakeDamage(damage);
+        lastDamageTime = Time.time;
+        damageCycleCount++;
+
+        int currentHealth = playerHealth.CurrentHealth;
+
+        if (previousHealth > 2)
+        {
+            PlayerAudioController audioController = playerCollider.GetComponent<PlayerAudioController>();
+            if (audioController != null)
             {
-                PlayerAudioController audioController = playerCollider.GetComponent<PlayerAudioController>();
-                if (audioController != null)
-                {
-                    audioController.PlayDamageSound();
-                    audioController.PlayBurnSound();
-                    soundPlayCount++;
-                }
+                audioController.PlayDamageSound();
+                audioController.PlayBurnSound();
             }
 
             DamageFlash flash = playerCollider.GetComponent<DamageFlash>();
@@ -63,6 +71,12 @@ public class Trap : MonoBehaviour
             {
                 flash.PlayFlash();
             }
+        }
+
+        if (currentHealth <= 0)
+        {
+            isPlayerInTrap = false;
+            player = null;
         }
     }
 }
