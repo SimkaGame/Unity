@@ -33,7 +33,6 @@ public class Trap : MonoBehaviour
 
     private void Update()
     {
-        // Проверка на кулдаун для урона
         if (isPlayerInTrap && Time.time - lastDamageTime >= damageCooldown && player != null)
         {
             ApplyDamage(player.GetComponent<Collider2D>());
@@ -54,6 +53,7 @@ public class Trap : MonoBehaviour
                 if (audioController != null)
                 {
                     audioController.PlayDamageSound();
+                    audioController.PlayBurnSound();
                     soundPlayCount++;
                 }
             }

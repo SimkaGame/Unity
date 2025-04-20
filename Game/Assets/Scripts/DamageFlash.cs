@@ -23,7 +23,9 @@ public class DamageFlash : MonoBehaviour
     public void PlayFlash()
     {
         if (flashRoutine != null)
+        {
             StopCoroutine(flashRoutine);
+        }
 
         flashRoutine = StartCoroutine(FlashRoutine());
     }

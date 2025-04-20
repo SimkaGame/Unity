@@ -3,6 +3,7 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
     [SerializeField] private AudioClip hitSound;
+    [SerializeField] [Range(0f, 1f)] private float hitSoundVolume = 0.3f;
 
     void Update()
     {
@@ -33,6 +34,7 @@ public class Arrow : MonoBehaviour
         soundObject.transform.position = position;
         AudioSource audioSource = soundObject.AddComponent<AudioSource>();
         audioSource.clip = clip;
+        audioSource.volume = hitSoundVolume;
         audioSource.spatialBlend = 0f;
         audioSource.Play();
         Destroy(soundObject, clip.length);

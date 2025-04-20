@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
         playerAnimator = GetComponent<PlayerAnimator>();
 
         originalSpeed = speed;
@@ -65,7 +66,10 @@ public class PlayerController : MonoBehaviour
             Flip();
         }
 
-        playerAnimator.UpdateAnimation(horizontalMove, isGrounded, FacingRight);
+        if (playerAnimator != null)
+        {
+            playerAnimator.UpdateAnimation(horizontalMove, isGrounded, FacingRight);
+        }
     }
 
     public void Flip()
@@ -73,7 +77,7 @@ public class PlayerController : MonoBehaviour
         FacingRight = !FacingRight;
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
-        transform.localScale = theScale;
+        transform.localScale = theScale;;
     }
 
     private void FixedUpdate()
@@ -84,7 +88,8 @@ public class PlayerController : MonoBehaviour
 
     private void CheckGround()
     {
-        isGrounded = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius, groundLayer);
+        Vector2 checkPosition = new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY);
+        isGrounded = Physics2D.OverlapCircle(checkPosition, checkGroundRadius, groundLayer);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

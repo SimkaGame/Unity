@@ -8,6 +8,7 @@ public class PlayerAudioController : MonoBehaviour
     [SerializeField] private AudioClip landSound;
     [SerializeField] private AudioClip damageSound;
     [SerializeField] private AudioClip shootSound;
+    [SerializeField] private AudioClip burnSound;
 
     private PlayerController playerController;
     private bool wasGrounded;
@@ -89,6 +90,14 @@ public class PlayerAudioController : MonoBehaviour
         if (shootSound != null)
         {
             landAudioSource.PlayOneShot(shootSound);
+        }
+    }
+
+    public void PlayBurnSound()
+    {
+        if (burnSound != null)
+        {
+            landAudioSource.PlayOneShot(burnSound);
         }
     }
 

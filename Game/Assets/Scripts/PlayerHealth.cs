@@ -9,10 +9,46 @@ public class PlayerHealth : MonoBehaviour
     public Transform heartsContainer;
     private Image[] heartImages;
 
+    [Header("Fall Damage Settings")]
+    [SerializeField] private float airTimeThreshold = 1f;
+    [SerializeField] private float damagePerSecond = 2f;
+
+    private float airTime = 0f;
+    private bool wasGroundedLastFrame = true; // Флаг isGrounded
+    private PlayerController playerController;
+    private DamageFlash damageFlash;
+    private PlayerAudioController audioController;
+
     private void Start()
     {
         currentHealth = maxHealth;
+        playerController = GetComponent<PlayerController>();
+        damageFlash = GetComponent<DamageFlash>();
+        audioController = GetComponent<PlayerAudioController>();
         InitializeHearts();
+    }
+
+    private void FixedUpdate()
+    {
+        if (playerController == null) return;
+
+        bool isGrounded = playerController.IsGrounded;
+
+        if (!isGrounded)
+        {
+            airTime += Time.deltaTime;
+        }
+        else
+        {
+            if (!wasGroundedLastFrame && airTime >= airTimeThreshold)
+            {
+                int fallDamage = Mathf.FloorToInt(airTime * damagePerSecond);
+                TakeDamage(fallDamage, isFromTrap: false);
+            }
+            airTime = 0f;
+        }
+
+        wasGroundedLastFrame = isGrounded;
     }
 
     private void InitializeHearts()
@@ -32,10 +68,22 @@ public class PlayerHealth : MonoBehaviour
         UpdateHearts();
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, bool isFromTrap = true)
     {
         currentHealth = Mathf.Max(0, currentHealth - damage);
         UpdateHearts();
+
+        if (!isFromTrap)
+        {
+            if (damageFlash != null)
+            {
+                damageFlash.PlayFlash();
+            }
+            if (audioController != null)
+            {
+                audioController.PlayDamageSound();
+            }
+        }
 
         if (currentHealth <= 0)
         {
@@ -55,6 +103,7 @@ public class PlayerHealth : MonoBehaviour
     {
         transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
         currentHealth = maxHealth;
+        airTime = 0f;
         UpdateHearts();
     }
 
