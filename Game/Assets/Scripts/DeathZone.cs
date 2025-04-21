@@ -19,6 +19,12 @@ public class DeathZone : MonoBehaviour
             flash.PlayFlash();
         }
 
+        PlayerHealth health = other.GetComponent<PlayerHealth>();
+        if (health != null)
+        {
+            health.ResetAirTime();
+        }
+
         StartCoroutine(RespawnPlayer(other));
     }
 

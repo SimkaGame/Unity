@@ -10,7 +10,7 @@ public class PlayerHealth : MonoBehaviour
     public Transform heartsContainer;
     private Image[] heartImages;
 
-    [Header("Fall Damage Settings")]
+    [Header("Настройки падения")]
     [SerializeField] private float airTimeThreshold = 1f;
     [SerializeField] private float damagePerSecond = 2f;
 
@@ -152,5 +152,10 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         UpdateHearts();
+    }
+
+    public void ResetAirTime()
+    {
+        airTime = 0f;
     }
 }
