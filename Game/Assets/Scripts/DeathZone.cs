@@ -5,53 +5,30 @@ public class DeathZone : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-
-        PlayerAudioController audioController = other.GetComponent<PlayerAudioController>();
-        if (audioController != null)
+        if (other.CompareTag("Player"))
         {
-            audioController.PlayDamageSound();
+            other.GetComponent<PlayerAudioController>()?.PlayDamageSound();
+            other.GetComponent<DamageFlash>()?.PlayFlash();
+            other.GetComponent<PlayerHealth>()?.ResetAirTime();
+            StartCoroutine(RespawnPlayer(other));
         }
-
-        DamageFlash flash = other.GetComponent<DamageFlash>();
-        if (flash != null)
+        else if (other.CompareTag("Enemy"))
         {
-            flash.PlayFlash();
+            Destroy(other.gameObject);
         }
-
-        PlayerHealth health = other.GetComponent<PlayerHealth>();
-        if (health != null)
-        {
-            health.ResetAirTime();
-        }
-
-        StartCoroutine(RespawnPlayer(other));
     }
 
     private IEnumerator RespawnPlayer(Collider2D player)
     {
         yield return new WaitForSeconds(0.2f);
 
-        if (CheckpointManager.Instance != null)
-        {
-            Vector3 checkpoint = CheckpointManager.Instance.GetLastCheckpointPosition();
-
-            Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector2.zero;
-                player.transform.position = checkpoint;
-            }
-            else
-            {
-                player.transform.position = checkpoint;
-            }
-        }
-
-        PlayerHealth health = player.GetComponent<PlayerHealth>();
-        if (health != null)
-        {
-            health.ResetHealth();
-        }
+        Vector3 checkpoint = CheckpointManager.Instance.GetLastCheckpointPosition();
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+        
+        if (rb)
+            rb.linearVelocity = Vector2.zero;
+        
+        player.transform.position = checkpoint;
+        player.GetComponent<PlayerHealth>()?.ResetHealth();
     }
 }

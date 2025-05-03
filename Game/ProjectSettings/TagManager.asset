@@ -7,6 +7,7 @@ TagManager:
   - Collectible
   - DeathZone
   - Checkpoint
+  - Enemy
   layers:
   - Default
   - TransparentFX

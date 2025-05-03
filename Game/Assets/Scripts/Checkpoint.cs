@@ -2,38 +2,29 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-    public Animator animator;
-    public GameObject checkpointTextPrefab;
-    private bool isActive = false;
+    [SerializeField] private Animator animator;
+    [SerializeField] private GameObject checkpointTextPrefab;
+
+    private bool isActive;
 
     private void Start()
     {
-        if (animator != null)
-        {
-            animator.Play("CheckpointIdle");
-        }
+        animator.Play("CheckpointIdle");
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && !isActive)
-        {
             ActivateCheckpoint(other.transform);
-        }
     }
 
     private void ActivateCheckpoint(Transform playerTransform)
     {
         isActive = true;
-
-        AudioSource audioSource = GetComponent<AudioSource>();
-        CheckpointManager.Instance.SetCheckpoint(transform.position, audioSource);
-
-        if (checkpointTextPrefab != null)
-        {
-            Vector3 spawnPosition = playerTransform.position + Vector3.up * 1.5f;
-            Instantiate(checkpointTextPrefab, spawnPosition, Quaternion.identity);
-        }
+        CheckpointManager.Instance.SetCheckpoint(transform.position, GetComponent<AudioSource>());
+        
+        if (checkpointTextPrefab)
+            Instantiate(checkpointTextPrefab, playerTransform.position + Vector3.up * 1.5f, Quaternion.identity);
 
         gameObject.SetActive(false);
     }

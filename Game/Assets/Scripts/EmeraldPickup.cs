@@ -4,46 +4,23 @@ public class EmeraldPickup : MonoBehaviour
 {
     private Animator anim;
     private AudioSource audioSource;
-    private bool isPicked = false;
+    private bool isPicked;
 
-    void Start()
+    private void Awake()
     {
         anim = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
     }
 
-    public void TriggerPickupAnimation()
-    {
-        if (!isPicked)
-        {
-            isPicked = true;
-
-            anim.SetTrigger("pickupTrigger");
-
-            if (audioSource != null && audioSource.clip != null)
-            {
-                audioSource.PlayOneShot(audioSource.clip);
-            }
-
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddEmerald();
-            }
-
-            Invoke("DestroySelf", 0.5f);
-        }
-    }
-
-    void DestroySelf()
-    {
-        Destroy(gameObject);
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && !isPicked)
         {
-            TriggerPickupAnimation();
+            isPicked = true;
+            anim.SetTrigger("pickupTrigger");
+            audioSource.PlayOneShot(audioSource.clip);
+            GameManager.Instance.AddEmerald();
+            Destroy(gameObject, 0.5f);
         }
     }
 }

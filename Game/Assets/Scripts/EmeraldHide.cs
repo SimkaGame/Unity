@@ -2,44 +2,29 @@ using UnityEngine;
 
 public class EmeraldHide : MonoBehaviour
 {
-    private AudioSource audioSource;
-    private bool isPicked = false;
+    [SerializeField] private AudioSource audioSource;
+    private bool isPicked;
 
-    void Start()
+    private void Start()
     {
         audioSource = GetComponent<AudioSource>();
     }
 
     public void TriggerPickup()
     {
-        if (!isPicked)
-        {
-            isPicked = true;
+        if (isPicked) return;
 
-            if (audioSource != null && audioSource.clip != null)
-            {
-                audioSource.PlayOneShot(audioSource.clip);
-            }
+        isPicked = true;
+        if (audioSource?.clip)
+            audioSource.PlayOneShot(audioSource.clip);
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddEmerald();
-            }
-
-            Invoke("DestroySelf", 0.5f);
-        }
+        GameManager.Instance.AddEmerald();
+        Destroy(gameObject, 0.5f);
     }
 
-    void DestroySelf()
-    {
-        Destroy(gameObject);
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && !isPicked)
-        {
             TriggerPickup();
-        }
     }
 }

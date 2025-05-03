@@ -11,19 +11,16 @@ public class WindPlayer : MonoBehaviour
     private AudioSource sourceB;
     private AudioSource currentSource;
     private AudioSource nextSource;
-    private bool isFading = false;
 
-    void Awake()
+    private void Awake()
     {
         sourceA = gameObject.AddComponent<AudioSource>();
         sourceB = gameObject.AddComponent<AudioSource>();
 
         sourceA.playOnAwake = false;
         sourceB.playOnAwake = false;
-
         sourceA.loop = false;
         sourceB.loop = false;
-
         sourceA.clip = windClip;
         sourceB.clip = windClip;
 
@@ -31,72 +28,42 @@ public class WindPlayer : MonoBehaviour
         nextSource = sourceB;
     }
 
-    void Start()
+    private void Start()
     {
-        if (windClip == null) return;
-
         float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
         currentSource.volume = sfxVolume * maxVolume;
         nextSource.volume = 0f;
         currentSource.Play();
-
-        float clipLength = windClip.length;
-        float nextDelay = Mathf.Max(clipLength - fadeTime - 0.5f, 0f);
-        Invoke(nameof(PlayNextCycle), nextDelay);
+        Invoke(nameof(PlayNextCycle), windClip.length);
     }
 
-    void PlayNextCycle()
+    private void PlayNextCycle()
     {
-        if (windClip == null || isFading) return;
-
         nextSource.volume = 0f;
         nextSource.Play();
-
-        StartCoroutine(Crossfade(currentSource, nextSource));
-
-        float clipLength = windClip.length;
-        float nextDelay = Mathf.Max(clipLength - fadeTime - 0.5f, 0f);
-        Invoke(nameof(PlayNextCycle), nextDelay);
+        StartCoroutine(Crossfade());
+        Invoke(nameof(PlayNextCycle), windClip.length);
     }
 
-    IEnumerator Crossfade(AudioSource from, AudioSource to)
+    private IEnumerator Crossfade()
     {
-        if (from == null || to == null)
-        {
-            isFading = false;
-            yield break;
-        }
-
-        isFading = true;
         float t = 0f;
-        float startVolumeFrom = from.volume;
+        float startVolumeFrom = currentSource.volume;
         float targetVolume = PlayerPrefs.GetFloat("SFXVolume", 1f) * maxVolume;
 
         while (t < fadeTime)
         {
             t += Time.unscaledDeltaTime;
             float normalized = t / fadeTime;
-
-            if (from != null) from.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
-            if (to != null) to.volume = Mathf.Lerp(0f, targetVolume, normalized);
-
+            currentSource.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
+            nextSource.volume = Mathf.Lerp(0f, targetVolume, normalized);
             yield return null;
         }
 
-        if (from != null)
-        {
-            from.Stop();
-            from.volume = 0f;
-        }
-        if (to != null)
-        {
-            to.volume = targetVolume;
-        }
+        currentSource.Stop();
+        currentSource.volume = 0f;
+        nextSource.volume = targetVolume;
 
-        var temp = currentSource;
-        currentSource = to;
-        nextSource = temp;
-
-        isFading = false;
+        (currentSource, nextSource) = (nextSource, currentSource);
     }
 }

@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class CheckpointManager : MonoBehaviour
 {
-    public static CheckpointManager Instance;
+    public static CheckpointManager Instance { get; private set; }
 
-    private Vector3 lastCheckpointPosition = Vector3.zero;
-    private Vector3 spawnOffset = new Vector3(0, 0.5f, 0);
+    private Vector3 lastCheckpointPosition;
+    private readonly Vector3 spawnOffset = new Vector3(0, 0.5f, 0);
 
     private void Awake()
     {
@@ -24,7 +24,7 @@ public class CheckpointManager : MonoBehaviour
     {
         lastCheckpointPosition = position;
 
-        if (audioSource != null && audioSource.clip != null)
+        if (audioSource?.clip)
         {
             GameObject soundObject = new GameObject("CheckpointSound");
             soundObject.transform.position = position;
@@ -33,16 +33,13 @@ public class CheckpointManager : MonoBehaviour
             tempAudio.volume = audioSource.volume;
             tempAudio.spatialBlend = audioSource.spatialBlend;
             tempAudio.Play();
-            Destroy(soundObject, audioSource.clip.length); 
+            Destroy(soundObject, audioSource.clip.length);
         }
 
-        Checkpoint[] checkpoints = FindObjectsByType<Checkpoint>(FindObjectsSortMode.None);
-        foreach (var checkpoint in checkpoints)
+        foreach (Checkpoint checkpoint in FindObjectsByType<Checkpoint>(FindObjectsSortMode.None))
         {
             if (Vector3.Distance(checkpoint.transform.position, position) > 0.1f)
-            {
                 checkpoint.Deactivate();
-            }
         }
     }
 

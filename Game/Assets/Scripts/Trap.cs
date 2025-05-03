@@ -2,12 +2,14 @@ using UnityEngine;
 
 public class Trap : MonoBehaviour
 {
-    public int damage = 2;
-    public float damageCooldown = 0.5f;
+    [SerializeField] private int damage = 2;
+    [SerializeField] private float damageCooldown = 0.5f;
+
     private float lastDamageTime;
-    private bool isPlayerInTrap = false;
+    private bool isPlayerInTrap;
     private GameObject player;
-    private int damageCycleCount = 0;
+    private bool isEnemyInTrap;
+    private GameObject enemy;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -15,8 +17,11 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = true;
             player = other.gameObject;
-            damageCycleCount = 0;
-            ApplyDamage(other);
+        }
+        else if (other.CompareTag("Enemy"))
+        {
+            isEnemyInTrap = true;
+            enemy = other.gameObject;
         }
     }
 
@@ -26,57 +31,72 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = false;
             player = null;
-            damageCycleCount = 0;
+        }
+        else if (other.CompareTag("Enemy"))
+        {
+            isEnemyInTrap = false;
+            enemy = null;
         }
     }
 
     private void Update()
     {
-        if (isPlayerInTrap && Time.time - lastDamageTime >= damageCooldown && player != null)
-        {
+        if (isPlayerInTrap && Time.time - lastDamageTime >= damageCooldown)
             ApplyDamage(player.GetComponent<Collider2D>());
-        }
+
+        if (isEnemyInTrap && Time.time - lastDamageTime >= damageCooldown)
+            ApplyDamageToEnemy(enemy.GetComponent<Collider2D>());
     }
 
     private void ApplyDamage(Collider2D playerCollider)
     {
         PlayerHealth playerHealth = playerCollider.GetComponent<PlayerHealth>();
-        if (playerHealth == null) return;
-
         int previousHealth = playerHealth.CurrentHealth;
-        if (previousHealth <= 0)
-        {
-            isPlayerInTrap = false;
-            player = null;
-            return;
-        }
+        if (previousHealth <= 0) return;
 
         playerHealth.TakeDamage(damage);
         lastDamageTime = Time.time;
-        damageCycleCount++;
-
-        int currentHealth = playerHealth.CurrentHealth;
 
         if (previousHealth > 2)
         {
             PlayerAudioController audioController = playerCollider.GetComponent<PlayerAudioController>();
-            if (audioController != null)
-            {
-                audioController.PlayDamageSound();
-                audioController.PlayBurnSound();
-            }
+            audioController.PlayDamageSound();
+            audioController.PlayBurnSound();
 
             DamageFlash flash = playerCollider.GetComponent<DamageFlash>();
-            if (flash != null)
-            {
-                flash.PlayFlash();
-            }
+            flash.PlayFlash();
         }
 
-        if (currentHealth <= 0)
+        if (playerHealth.CurrentHealth <= 0)
         {
             isPlayerInTrap = false;
             player = null;
+        }
+    }
+
+    private void ApplyDamageToEnemy(Collider2D enemyCollider)
+    {
+        EnemyAI enemyAI = enemyCollider.GetComponent<EnemyAI>();
+        int previousHealth = enemyAI.CurrentHealth;
+        if (previousHealth <= 0) return;
+
+        enemyAI.TakeDamage(damage);
+        lastDamageTime = Time.time;
+
+        if (previousHealth > 2)
+        {
+            EnemyAudioController audioController = enemyCollider.GetComponent<EnemyAudioController>();
+            audioController.PlayDamageSound();
+            audioController.PlayBurnSound();
+
+            DamageFlash flash = enemyCollider.GetComponent<DamageFlash>();
+            flash.PlayFlash();
+        }
+
+        if (enemyAI.CurrentHealth <= 0)
+        {
+            isEnemyInTrap = false;
+            enemy = null;
         }
     }
 }

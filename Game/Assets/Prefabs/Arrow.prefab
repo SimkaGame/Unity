@@ -104,6 +104,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitSound: {fileID: 8300000, guid: 16a0358e9f9ca904eaf63f125fb3a203, type: 3}
   hitSoundVolume: 0.279
+  damage: 4
 --- !u!50 &7358494636018194067
 Rigidbody2D:
   serializedVersion: 5

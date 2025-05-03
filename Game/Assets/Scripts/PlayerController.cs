@@ -2,82 +2,43 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private float horizontalMove = 0f;
-    private bool facingRight = false;
-
-    [Space]
-    [SerializeField] private bool isGrounded = false;
+    [SerializeField] private float speed = 1f;
+    [SerializeField] private float jumpForce = 2f;
     [SerializeField] private float checkGroundOffsetY = -1.8f;
     [SerializeField] private float checkGroundRadius = 0.3f;
     [SerializeField] private LayerMask groundLayer;
 
-    public float speed = 1f;
-    private float originalSpeed;
-    public float jumpForce = 2f;
-
+    private Rigidbody2D rb;
     private PlayerAnimator playerAnimator;
+    private float horizontalMove;
+    private float originalSpeed;
+    private bool facingRight;
+    private bool isGrounded;
 
     public float HorizontalMove => horizontalMove;
     public bool IsGrounded => isGrounded;
     public bool FacingRight { get => facingRight; set => facingRight = value; }
 
-    public bool isMovingRight = true;
-
-    void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-
         playerAnimator = GetComponent<PlayerAnimator>();
-
         originalSpeed = speed;
 
         Collider2D col = GetComponent<Collider2D>();
-        if (col != null)
-        {
-            col.sharedMaterial = new PhysicsMaterial2D { friction = 0f, bounciness = 0f };
-        }
+        col.sharedMaterial = new PhysicsMaterial2D { friction = 0f, bounciness = 0f };
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-        }
 
         horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
 
-        if (horizontalMove > 0)
-        {
-            isMovingRight = true;
-        }
-        else if (horizontalMove < 0)
-        {
-            isMovingRight = false;
-        }
+        if ((horizontalMove < 0 && FacingRight) || (horizontalMove > 0 && !FacingRight)) Flip();
 
-        if (horizontalMove < 0 && FacingRight)
-        {
-            Flip();
-        }
-        else if (horizontalMove > 0 && !FacingRight)
-        {
-            Flip();
-        }
-
-        if (playerAnimator != null)
-        {
-            playerAnimator.UpdateAnimation(horizontalMove, isGrounded, FacingRight);
-        }
-    }
-
-    public void Flip()
-    {
-        FacingRight = !FacingRight;
-        Vector3 theScale = transform.localScale;
-        theScale.x *= -1;
-        transform.localScale = theScale;;
+        playerAnimator.UpdateAnimation(horizontalMove, isGrounded, FacingRight);
     }
 
     private void FixedUpdate()
@@ -88,29 +49,17 @@ public class PlayerController : MonoBehaviour
 
     private void CheckGround()
     {
-        Vector2 checkPosition = new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY);
-        isGrounded = Physics2D.OverlapCircle(checkPosition, checkGroundRadius, groundLayer);
+        isGrounded = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius, groundLayer);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    public void Flip()
     {
-        if (other.CompareTag("Collectible"))
-        {
-            EmeraldPickup emerald = other.GetComponent<EmeraldPickup>();
-            if (emerald != null)
-            {
-                emerald.TriggerPickupAnimation();
-            }
-        }
+        FacingRight = !FacingRight;
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
     }
 
-    public void SlowDown(float slowFactor)
-    {
-        speed = originalSpeed * slowFactor;
-    }
-
-    public void RestoreSpeed()
-    {
-        speed = originalSpeed;
-    }
+    public void SlowDown(float slowFactor) => speed = originalSpeed * slowFactor;
+    public void RestoreSpeed() => speed = originalSpeed;
 }

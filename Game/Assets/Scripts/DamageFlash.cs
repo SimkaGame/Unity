@@ -1,20 +1,16 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(SpriteRenderer))]
 public class DamageFlash : MonoBehaviour
 {
-    [Header("Цвет вспышки")]
     [SerializeField] private Color flashColor = Color.red;
-
-    [Header("Длительность эффекта")]
     [SerializeField] private float flashDuration = 0.1f;
 
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Coroutine flashRoutine;
 
-    void Awake()
+    private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
@@ -23,9 +19,7 @@ public class DamageFlash : MonoBehaviour
     public void PlayFlash()
     {
         if (flashRoutine != null)
-        {
             StopCoroutine(flashRoutine);
-        }
 
         flashRoutine = StartCoroutine(FlashRoutine());
     }
@@ -33,8 +27,8 @@ public class DamageFlash : MonoBehaviour
     private IEnumerator FlashRoutine()
     {
         spriteRenderer.color = flashColor;
+        float t = 0;
 
-        float t = 0f;
         while (t < flashDuration)
         {
             t += Time.deltaTime;

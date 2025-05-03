@@ -9,11 +9,10 @@ public class SkyParallax : MonoBehaviour
     [SerializeField] private float quadScaleMultiplier = 4f;
 
     private Transform cameraTransform;
-    private Vector2 lastCameraPos;
     private Vector3 initialQuadPos;
     private Vector2 initialTextureOffset;
 
-    void Start()
+    private void Awake()
     {
         cameraTransform = Camera.main.transform;
         initialQuadPos = transform.position;
@@ -21,17 +20,11 @@ public class SkyParallax : MonoBehaviour
         skyMaterial.mainTextureScale = textureScale;
 
         float screenHeight = Camera.main.orthographicSize * 2;
-        float screenWidth = screenHeight * Camera.main.aspect;
-        transform.localScale = new Vector3(screenWidth * quadScaleMultiplier, screenHeight * quadScaleMultiplier, 1);
-
-        lastCameraPos = cameraTransform.position;
+        transform.localScale = new Vector3(screenHeight * Camera.main.aspect * quadScaleMultiplier, screenHeight * quadScaleMultiplier, 1);
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
-        Vector2 cameraPos = cameraTransform.position;
-        lastCameraPos = cameraPos;
-
         Vector3 quadPos = initialQuadPos;
         quadPos.x += (cameraTransform.position.x - initialQuadPos.x) * parallaxSpeed;
         quadPos.y += (cameraTransform.position.y - initialQuadPos.y) * parallaxSpeed;

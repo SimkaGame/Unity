@@ -13,9 +13,10 @@ public class MusicPlayer : MonoBehaviour
     private AudioSource currentSource;
     private AudioSource nextSource;
     private int currentIndex = -1;
-    private bool isFading = false;
+    private int previousIndex = -1;
+    private bool isFading;
 
-    void Awake()
+    private void Awake()
     {
         sourceA = gameObject.AddComponent<AudioSource>();
         sourceB = gameObject.AddComponent<AudioSource>();
@@ -28,104 +29,67 @@ public class MusicPlayer : MonoBehaviour
         nextSource = sourceB;
     }
 
-    void Start()
+    private void Start()
     {
-        if (musicTracks == null || musicTracks.Length == 0)
-        {
-            return;
-        }
+        if (musicTracks.Length == 0) return;
 
         maxVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         SetVolume(maxVolume);
         Invoke(nameof(PlayNextTrack), delayBeforePlay);
     }
 
-    void PlayNextTrack()
+    private void PlayNextTrack()
     {
         if (musicTracks.Length == 0 || isFading) return;
 
-        int nextIndex;
         do
         {
-            nextIndex = Random.Range(0, musicTracks.Length);
-        } while (musicTracks.Length > 1 && nextIndex == currentIndex);
+            currentIndex = Random.Range(0, musicTracks.Length);
+        } while (musicTracks.Length > 1 && currentIndex == previousIndex);
 
-        currentIndex = nextIndex;
+        previousIndex = currentIndex;
 
-        if (nextSource != null)
-        {
-            nextSource.clip = musicTracks[currentIndex];
-            nextSource.volume = 0f;
-            nextSource.Play();
-        }
+        nextSource.clip = musicTracks[currentIndex];
+        nextSource.volume = 0f;
+        nextSource.Play();
 
         StartCoroutine(Crossfade(currentSource, nextSource));
 
-        float trackLength = musicTracks[currentIndex].length;
-        float nextDelay = trackLength - fadeTime;
-        if (nextDelay < 0)
-        {
-            nextDelay = trackLength * 0.9f;
-        }
+        float nextDelay = Mathf.Max(musicTracks[currentIndex].length - fadeTime, musicTracks[currentIndex].length * 0.9f);
         Invoke(nameof(PlayNextTrack), nextDelay);
     }
 
-    IEnumerator Crossfade(AudioSource from, AudioSource to)
+    private IEnumerator Crossfade(AudioSource from, AudioSource to)
     {
-        if (from == null || to == null)
-        {
-            isFading = false;
-            yield break;
-        }
-
         isFading = true;
         float t = 0f;
         float startVolumeFrom = from.volume;
+
         while (t < fadeTime)
         {
             t += Time.unscaledDeltaTime;
             float normalized = t / fadeTime;
-            if (from != null)
-                from.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
-            if (to != null)
-                to.volume = Mathf.Lerp(0f, maxVolume, normalized);
+            from.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
+            to.volume = Mathf.Lerp(0f, maxVolume, normalized);
             yield return null;
         }
 
-        if (from != null)
-        {
-            from.Stop();
-            from.volume = 0f;
-        }
-        if (to != null)
-        {
-            to.volume = maxVolume;
-        }
+        from.Stop();
+        from.volume = 0f;
+        to.volume = maxVolume;
 
-        var temp = currentSource;
-        currentSource = to;
-        nextSource = temp;
-
+        (currentSource, nextSource) = (to, from);
         isFading = false;
     }
 
     public void SetVolume(float volume)
     {
         maxVolume = Mathf.Clamp01(volume);
-        if (currentSource != null && !isFading)
-        {
-            currentSource.volume = maxVolume;
-        }
-        if (nextSource != null && !isFading)
-        {
-            nextSource.volume = 0f;
-        }
+        if (!isFading) currentSource.volume = maxVolume;
+        if (!isFading) nextSource.volume = 0f;
         PlayerPrefs.SetFloat("MusicVolume", maxVolume);
         PlayerPrefs.Save();
     }
 
-    public float GetVolume()
-    {
-        return maxVolume;
-    }
+    public float GetVolume() => maxVolume;
 }

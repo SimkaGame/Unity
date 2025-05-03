@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAnimator : MonoBehaviour
 {
     private Animator animator;
 
-    void Start()
+    private void Awake()
     {
         animator = GetComponent<Animator>();
     }
@@ -17,8 +15,5 @@ public class PlayerAnimator : MonoBehaviour
         animator.SetBool("Jumping", !isGrounded);
     }
 
-    public void SetShooting(bool isShooting)
-    {
-        animator.SetBool("IsShooting", isShooting);
-    }
+    public void SetShooting(bool isShooting) => animator.SetBool("IsShooting", isShooting);
 }

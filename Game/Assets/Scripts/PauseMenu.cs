@@ -1,77 +1,46 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class PauseMenu : MonoBehaviour
 {
-    public GameObject menuPanel;
-    public Slider masterVolumeSlider;
-    public Slider musicVolumeSlider;
-    private MusicPlayer musicPlayer;
-    private AudioSource[] sfxSources;
-    private bool isPaused = false;
-    private PlayerShooting playerShooting;
+    [SerializeField] private GameObject menuPanel;
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
 
-    void Start()
+    private MusicPlayer musicPlayer;
+    private PlayerShooting playerShooting;
+    private bool isPaused;
+
+    private void Start()
     {
         musicPlayer = FindFirstObjectByType<MusicPlayer>();
         playerShooting = FindFirstObjectByType<PlayerShooting>();
 
-        sfxSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
-        if (musicPlayer != null)
-        {
-            AudioSource[] musicSources = musicPlayer.GetComponents<AudioSource>();
-            System.Collections.Generic.List<AudioSource> filteredSources = new System.Collections.Generic.List<AudioSource>();
-            foreach (var source in sfxSources)
-            {
-                bool isMusicSource = false;
-                foreach (var musicSource in musicSources)
-                {
-                    if (source == musicSource)
-                    {
-                        isMusicSource = true;
-                        break;
-                    }
-                }
-                if (!isMusicSource)
-                {
-                    filteredSources.Add(source);
-                }
-            }
-            sfxSources = filteredSources.ToArray();
-        }
+        masterVolumeSlider.minValue = 0f;
+        masterVolumeSlider.maxValue = 1f;
+        float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+        masterVolumeSlider.value = sfxVolume;
+        masterVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
+        SetSFXVolume(sfxVolume);
 
-        if (masterVolumeSlider != null)
-        {
-            masterVolumeSlider.minValue = 0f;
-            masterVolumeSlider.maxValue = 1f;
-            float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
-            masterVolumeSlider.value = sfxVolume;
-            masterVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
-            SetSFXVolume(sfxVolume);
-        }
-
-        if (musicVolumeSlider != null)
-        {
-            musicVolumeSlider.minValue = 0f;
-            musicVolumeSlider.maxValue = 1f;
-            float musicVolume = musicPlayer != null ? musicPlayer.GetVolume() : PlayerPrefs.GetFloat("MusicVolume", 1f);
-            musicVolumeSlider.value = musicVolume;
-            musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
-            SetMusicVolume(musicVolume);
-        }
+        musicVolumeSlider.minValue = 0f;
+        musicVolumeSlider.maxValue = 1f;
+        float musicVolume = musicPlayer ? musicPlayer.GetVolume() : PlayerPrefs.GetFloat("MusicVolume", 1f);
+        musicVolumeSlider.value = musicVolume;
+        musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
+        SetMusicVolume(musicVolume);
 
         menuPanel.SetActive(false);
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isPaused)
-                ContinueGame();
-            else
-                PauseGame();
+            if (isPaused) ContinueGame();
+            else PauseGame();
         }
     }
 
@@ -81,19 +50,10 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 0f;
         isPaused = true;
 
-        if (masterVolumeSlider != null)
-        {
-            masterVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume", 1f);
-        }
-        if (musicVolumeSlider != null && musicPlayer != null)
-        {
-            musicVolumeSlider.value = musicPlayer.GetVolume();
-        }
+        masterVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume", 1f);
+        if (musicPlayer) musicVolumeSlider.value = musicPlayer.GetVolume();
 
-        if (playerShooting != null)
-        {
-            playerShooting.OnPause();
-        }
+        playerShooting.OnPause();
     }
 
     public void ContinueGame()
@@ -101,45 +61,40 @@ public class PauseMenu : MonoBehaviour
         menuPanel.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
-
-        if (playerShooting != null)
-        {
-            playerShooting.OnResume();
-        }
+        playerShooting.OnResume();
     }
 
-    public static bool IsPaused()
-    {
-        return FindFirstObjectByType<PauseMenu>()?.isPaused ?? false;
-    }
+    public static bool IsPaused() => FindFirstObjectByType<PauseMenu>().isPaused;
 
     public void ExitGame()
     {
         Application.Quit();
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
     }
 
-    void SetSFXVolume(float volume)
+    private void SetSFXVolume(float volume)
     {
+        var sfxSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        if (musicPlayer)
+        {
+            var musicSources = musicPlayer.GetComponents<AudioSource>();
+            sfxSources = sfxSources.Where(source => source && !musicSources.Contains(source)).ToArray();
+        }
+
         foreach (var source in sfxSources)
         {
-            if (source != null)
-            {
-                source.volume = volume;
-            }
+            if (source) source.volume = volume;
         }
+
         PlayerPrefs.SetFloat("SFXVolume", volume);
         PlayerPrefs.Save();
     }
 
-    void SetMusicVolume(float volume)
+    private void SetMusicVolume(float volume)
     {
-        if (musicPlayer != null)
-        {
-            musicPlayer.SetVolume(volume);
-        }
+        if (musicPlayer) musicPlayer.SetVolume(volume);
         PlayerPrefs.SetFloat("MusicVolume", volume);
         PlayerPrefs.Save();
     }
