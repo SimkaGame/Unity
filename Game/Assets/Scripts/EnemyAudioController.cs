@@ -8,15 +8,8 @@ public class EnemyAudioController : MonoBehaviour
     [SerializeField] private AudioClip deathSound;
     [SerializeField, Range(0f, 1f)] private float soundVolume = 1f;
 
-    private void PlaySound(AudioClip clip, Vector3 position)
-    {
-        if (!clip) return;
-
-        AudioSource.PlayClipAtPoint(clip, position, soundVolume);
-    }
-
-    public void PlayDamageSound() => PlaySound(damageSound, transform.position);
-    public void PlayBurnSound() => PlaySound(burnSound, transform.position);
-    public void PlayHitSound() => PlaySound(hitSound, transform.position);
-    public void PlayDeathSound() => PlaySound(deathSound, transform.position);
+    public void PlayDamageSound() => AudioSource.PlayClipAtPoint(damageSound, transform.position, soundVolume);
+    public void PlayBurnSound() => AudioSource.PlayClipAtPoint(burnSound, transform.position, soundVolume);
+    public void PlayHitSound() => AudioSource.PlayClipAtPoint(hitSound, transform.position, soundVolume);
+    public void PlayDeathSound() => AudioSource.PlayClipAtPoint(deathSound, transform.position, soundVolume);
 }

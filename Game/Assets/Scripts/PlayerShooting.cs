@@ -99,17 +99,33 @@ public class PlayerShooting : MonoBehaviour
             1
         );
 
-        float angle = bowFacingRight
-            ? Mathf.Atan2(-direction.y, direction.x) * Mathf.Rad2Deg + rightAngleOffset
-            : Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + leftAngleOffset + initialBowAngle;
-        if (angle < 0) angle += 360f;
-        bowTransform.localRotation = Quaternion.Euler(0, 0, angle);
-
         playerAnimator.SetShooting(true);
         bowAnimator.enabled = true;
         bowAnimator.Play("BowPull", -1, 0f);
 
-        yield return new WaitForSeconds(0.95f);
+        float elapsedTime = 0f;
+        float pullDuration = 0.95f;
+        while (elapsedTime < pullDuration)
+        {
+            mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPos.z = 0;
+            direction = (mouseWorldPos - transform.position).normalized;
+            bowFacingRight = mouseWorldPos.x > transform.position.x;
+
+            float angle = bowFacingRight
+                ? Mathf.Atan2(-direction.y, direction.x) * Mathf.Rad2Deg + rightAngleOffset
+                : Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + leftAngleOffset + initialBowAngle;
+            if (angle < 0) angle += 360f;
+            bowTransform.localRotation = Quaternion.Euler(0, 0, angle);
+
+            if (bowFacingRight != playerController.FacingRight)
+            {
+                playerController.Flip();
+            }
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
 
         mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
@@ -121,11 +137,11 @@ public class PlayerShooting : MonoBehaviour
             playerController.Flip();
         }
 
-        angle = bowFacingRight
+        float finalAngle = bowFacingRight
             ? Mathf.Atan2(-direction.y, direction.x) * Mathf.Rad2Deg + rightAngleOffset
             : Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + leftAngleOffset + initialBowAngle;
-        if (angle < 0) angle += 360f;
-        bowTransform.localRotation = Quaternion.Euler(0, 0, angle);
+        if (finalAngle < 0) finalAngle += 360f;
+        bowTransform.localRotation = Quaternion.Euler(0, 0, finalAngle);
 
         Vector2 spawnPosition = new Vector2(
             transform.position.x + (bowFacingRight ? fireOffset : -fireOffset),

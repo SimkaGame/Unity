@@ -4,15 +4,10 @@ using Pathfinding;
 [RequireComponent(typeof(Seeker))]
 public class EnemyAI : MonoBehaviour
 {
-    private Seeker seeker;
-    private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
-
     [SerializeField] private Transform target;
-    [SerializeField] private float speed = 0.5f;
-    [SerializeField] private float nextWaypointDistance = 1.5f;
+    [SerializeField] private float speed = 0.2f;
+    [SerializeField] private float nextWaypointDistance = 2f;
     [SerializeField] private float updatePathInterval = 0.5f;
-    [SerializeField] private bool isGrounded;
     [SerializeField] private float checkGroundOffsetY = -1.8f;
     [SerializeField] private float checkGroundRadius = 0.3f;
     [SerializeField] private LayerMask groundLayer;
@@ -21,20 +16,26 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float jumpHeightThreshold = 0.5f;
     [SerializeField] private float jumpCooldown = 1f;
     [SerializeField] private int damage = 1;
-    [SerializeField] private float attackCooldown = 0.5f;
-    [SerializeField] private Vector2 attackBoxSize = new Vector2(1.5f, 1.5f);
-    [SerializeField] private Vector2 attackBoxOffset = Vector2.zero;
+    [SerializeField] private float attackCooldown = 0.3f;
+    [SerializeField] private Vector2 attackBoxSize = new Vector2(4f, 4f);
+    [SerializeField] private Vector2 attackBoxOffset = new Vector2(1f, 0f);
     [SerializeField] private LayerMask playerLayer;
-    [SerializeField] private float chaseDistance = 10f;
+    [SerializeField] private float chaseDistance = 15f;
     [SerializeField] private int health = 10;
 
+    private Seeker seeker;
+    private Rigidbody2D rb;
+    private EnemyAudioController audioController;
+    private DamageFlash damageFlash;
     private float lastJumpTime;
     private float lastAttackTime;
     private int currentHealth;
     private Path path;
     private int currentWaypoint;
-    private bool facingRight = true;
+    private bool facingRight;
     private bool isChasing;
+    private bool isGrounded;
+    private Vector2 smoothedDirection;
 
     public int CurrentHealth => currentHealth;
 
@@ -42,24 +43,29 @@ public class EnemyAI : MonoBehaviour
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        audioController = GetComponent<EnemyAudioController>();
+        damageFlash = GetComponent<DamageFlash>();
 
         rb.gravityScale = 2f;
         rb.linearDamping = 1f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-        target ??= GameObject.FindGameObjectWithTag("Player")?.transform;
-        currentHealth = health;
+        if (!target)
+        {
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj) target = playerObj.transform;
+        }
 
+        currentHealth = health;
         InvokeRepeating(nameof(UpdatePath), 0f, updatePathInterval);
 
-        Collider2D col = GetComponent<Collider2D>();
+        var col = GetComponent<Collider2D>();
         col.sharedMaterial = new PhysicsMaterial2D { friction = 0f };
     }
 
     private void UpdatePath()
     {
-        if (seeker.IsDone() && target && isChasing)
+        if (seeker.IsDone() && target)
             seeker.StartPath(transform.position, target.position, OnPathComplete);
     }
 
@@ -70,14 +76,24 @@ public class EnemyAI : MonoBehaviour
             path = p;
             currentWaypoint = 0;
         }
+        else
+        {
+            path = null;
+            currentWaypoint = 0;
+        }
     }
 
     private void FixedUpdate()
     {
         if (!target)
         {
-            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-            return;
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj) target = playerObj.transform;
+            else
+            {
+                rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+                return;
+            }
         }
 
         isChasing = Vector2.Distance(transform.position, target.position) <= chaseDistance;
@@ -85,26 +101,30 @@ public class EnemyAI : MonoBehaviour
         if (!isChasing || path == null || currentWaypoint >= path.vectorPath.Count)
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            UpdatePath();
             return;
         }
 
         CheckGround();
 
-        Vector2 currentPos = rb.position;
-        Vector2 targetPos = path.vectorPath[currentWaypoint];
-        Vector2 direction = (targetPos - currentPos).normalized;
+        var currentPos = rb.position;
+        var targetPos = path.vectorPath[currentWaypoint];
+        var direction = ((Vector2)targetPos - currentPos).normalized;
 
-        float horizontalMove = direction.x * speed;
+
+        smoothedDirection = Vector2.Lerp(smoothedDirection, direction, Time.fixedDeltaTime * 10f);
+
+        var horizontalMove = smoothedDirection.x * speed;
         rb.linearVelocity = new Vector2(
-            Mathf.Lerp(rb.linearVelocity.x, horizontalMove * 5f, Time.fixedDeltaTime * 10f),
+            Mathf.Lerp(rb.linearVelocity.x, horizontalMove, Time.fixedDeltaTime * 10f),
             rb.linearVelocity.y
         );
 
         if (isGrounded && Time.time >= lastJumpTime + jumpCooldown)
         {
-            RaycastHit2D hit = Physics2D.Raycast(currentPos, new Vector2(direction.x, 0), jumpCheckDistance, groundLayer);
-            bool obstacleAhead = hit.collider != null;
-            bool needsJumpUp = targetPos.y > currentPos.y + jumpHeightThreshold;
+            var hit = Physics2D.Raycast(currentPos, new Vector2(direction.x, 0), jumpCheckDistance, groundLayer);
+            var obstacleAhead = hit.collider != null;
+            var needsJumpUp = targetPos.y > currentPos.y + jumpHeightThreshold;
 
             if (obstacleAhead || needsJumpUp)
             {
@@ -116,9 +136,9 @@ public class EnemyAI : MonoBehaviour
         if (Vector2.Distance(currentPos, targetPos) < nextWaypointDistance)
             currentWaypoint++;
 
-        if (Mathf.Abs(horizontalMove) > 0.01f)
+        if (Mathf.Abs(horizontalMove) > 0.1f)
         {
-            bool movingRight = horizontalMove < 0;
+            var movingRight = horizontalMove > 0;
             if (movingRight != facingRight)
                 Flip();
         }
@@ -128,35 +148,43 @@ public class EnemyAI : MonoBehaviour
 
     private void CheckAttack()
     {
-        Vector2 attackPos = (Vector2)transform.position + attackBoxOffset;
-        Collider2D hit = Physics2D.OverlapBox(attackPos, attackBoxSize, 0f, playerLayer);
+        var attackPos = (Vector2)transform.position + (facingRight ? attackBoxOffset : new Vector2(-attackBoxOffset.x, attackBoxOffset.y));
+        var hit = Physics2D.OverlapBox(attackPos, attackBoxSize, 0f, playerLayer);
 
         if (hit && hit.CompareTag("Player") && Time.time >= lastAttackTime + attackCooldown)
         {
-            hit.GetComponent<PlayerHealth>().TakeDamage(damage, isFromTrap: false);
-            lastAttackTime = Time.time;
+            var playerHealth = hit.GetComponent<PlayerHealth>();
+            if (playerHealth && playerHealth.CurrentHealth > 0)
+            {
+                playerHealth.TakeDamage(damage, false);
+                lastAttackTime = Time.time;
+            }
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, bool isFromTrap = false)
     {
         currentHealth -= damage;
 
         if (currentHealth <= 0)
         {
-            GetComponent<EnemyAudioController>()?.PlayDeathSound();
+            audioController?.PlayDeathSound();
             Destroy(gameObject);
         }
         else
         {
-            GetComponent<DamageFlash>()?.PlayFlash();
+            if (isFromTrap)
+                audioController?.PlayDamageSound();
+            else
+                audioController?.PlayHitSound();
+            damageFlash?.PlayFlash();
         }
     }
 
     private void Flip()
     {
         facingRight = !facingRight;
-        Vector3 theScale = transform.localScale;
+        var theScale = transform.localScale;
         theScale.x *= -1;
         transform.localScale = theScale;
     }
@@ -165,4 +193,15 @@ public class EnemyAI : MonoBehaviour
     {
         isGrounded = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius, groundLayer);
     }
+
+    private void OnDrawGizmos()
+{
+    var attackPos = (Vector2)transform.position + (facingRight ? attackBoxOffset : new Vector2(-attackBoxOffset.x, attackBoxOffset.y));
+    Gizmos.color = Color.red;
+    Gizmos.DrawWireCube(attackPos, attackBoxSize);
+
+    Gizmos.color = Color.yellow;
+    Gizmos.DrawWireSphere(transform.position, chaseDistance);
+}
+
 }

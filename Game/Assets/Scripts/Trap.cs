@@ -41,57 +41,51 @@ public class Trap : MonoBehaviour
 
     private void Update()
     {
-        if (isPlayerInTrap && Time.time - lastDamageTime >= damageCooldown)
+        if (isPlayerInTrap && Time.time >= lastDamageTime + damageCooldown)
             ApplyDamage(player.GetComponent<Collider2D>());
 
-        if (isEnemyInTrap && Time.time - lastDamageTime >= damageCooldown)
+        if (isEnemyInTrap && Time.time >= lastDamageTime + damageCooldown)
             ApplyDamageToEnemy(enemy.GetComponent<Collider2D>());
     }
 
     private void ApplyDamage(Collider2D playerCollider)
+{
+    var playerHealth = playerCollider.GetComponent<PlayerHealth>();
+    if (playerHealth.CurrentHealth <= 0) return;
+
+    int predictedHealth = playerHealth.CurrentHealth - damage;
+    bool willSurvive = predictedHealth > 0;
+
+    playerHealth.TakeDamage(damage);
+    lastDamageTime = Time.time;
+
+    if (willSurvive)
     {
-        PlayerHealth playerHealth = playerCollider.GetComponent<PlayerHealth>();
-        int previousHealth = playerHealth.CurrentHealth;
-        if (previousHealth <= 0) return;
-
-        playerHealth.TakeDamage(damage);
-        lastDamageTime = Time.time;
-
-        if (previousHealth > 2)
-        {
-            PlayerAudioController audioController = playerCollider.GetComponent<PlayerAudioController>();
-            audioController.PlayDamageSound();
-            audioController.PlayBurnSound();
-
-            DamageFlash flash = playerCollider.GetComponent<DamageFlash>();
-            flash.PlayFlash();
-        }
-
-        if (playerHealth.CurrentHealth <= 0)
-        {
-            isPlayerInTrap = false;
-            player = null;
-        }
+        var audioController = playerCollider.GetComponent<PlayerAudioController>();
+        audioController.PlayDamageSound();
+        audioController.PlayBurnSound();
+        playerCollider.GetComponent<DamageFlash>().PlayFlash();
     }
+
+    if (playerHealth.CurrentHealth <= 0)
+    {
+        isPlayerInTrap = false;
+        player = null;
+    }
+}
+
+
 
     private void ApplyDamageToEnemy(Collider2D enemyCollider)
     {
-        EnemyAI enemyAI = enemyCollider.GetComponent<EnemyAI>();
-        int previousHealth = enemyAI.CurrentHealth;
-        if (previousHealth <= 0) return;
+        var enemyAI = enemyCollider.GetComponent<EnemyAI>();
+        if (enemyAI.CurrentHealth <= 0) return;
 
-        enemyAI.TakeDamage(damage);
+        enemyAI.TakeDamage(damage, true);
         lastDamageTime = Time.time;
 
-        if (previousHealth > 2)
-        {
-            EnemyAudioController audioController = enemyCollider.GetComponent<EnemyAudioController>();
-            audioController.PlayDamageSound();
-            audioController.PlayBurnSound();
-
-            DamageFlash flash = enemyCollider.GetComponent<DamageFlash>();
-            flash.PlayFlash();
-        }
+        if (enemyAI.CurrentHealth > 0)
+            enemyCollider.GetComponent<EnemyAudioController>().PlayBurnSound();
 
         if (enemyAI.CurrentHealth <= 0)
         {

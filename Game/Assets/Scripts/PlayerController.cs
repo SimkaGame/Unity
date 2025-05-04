@@ -24,9 +24,6 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<PlayerAnimator>();
         originalSpeed = speed;
-
-        Collider2D col = GetComponent<Collider2D>();
-        col.sharedMaterial = new PhysicsMaterial2D { friction = 0f, bounciness = 0f };
     }
 
     private void Update()

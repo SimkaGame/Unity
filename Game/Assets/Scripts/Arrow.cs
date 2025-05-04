@@ -1,57 +1,75 @@
 using UnityEngine;
+using System.Collections;
 
 public class Arrow : MonoBehaviour
 {
-    [SerializeField] private AudioClip hitSound;
-    [SerializeField, Range(0f, 1f)] private float hitSoundVolume = 0.3f;
     [SerializeField] private int damage = 4;
+    
+    private AudioSource audioSource;
+    private Rigidbody2D rb;
+    private Camera mainCamera;
+    private bool isStuck;
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        rb = GetComponent<Rigidbody2D>();
+        mainCamera = Camera.main;
+    }
 
     private void Update()
     {
-        Vector3 screenPos = Camera.main.WorldToViewportPoint(transform.position);
+        if (isStuck) return;
+        
+        var screenPos = mainCamera.WorldToViewportPoint(transform.position);
         if (screenPos.x < 0 || screenPos.x > 1 || screenPos.y < 0 || screenPos.y > 1)
             Destroy(gameObject);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        HandleHit(collision.gameObject);
+        HandleHit(collision.gameObject, collision.contacts[0].normal);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        HandleHit(other.gameObject);
+        HandleHit(other.gameObject, Vector2.zero);
     }
 
-    private void HandleHit(GameObject target)
+    private void HandleHit(GameObject target, Vector2 normal)
     {
-        if (target.CompareTag("Enemy"))
+        if (target.CompareTag("Enemy") && target.TryGetComponent<EnemyAI>(out var enemy))
         {
-            if (target.TryGetComponent<EnemyAI>(out var enemy))
-            {
-                enemy.TakeDamage(damage);
-                target.GetComponent<EnemyAudioController>()?.PlayHitSound();
-            }
+            enemy.TakeDamage(damage);
             Destroy(gameObject);
-            return;
         }
-
-        if (target.layer == LayerMask.NameToLayer("Ground"))
+        else if (target.layer == LayerMask.NameToLayer("Ground") && audioSource != null && audioSource.clip != null)
         {
-            if (hitSound)
-                PlaySound(hitSound, transform.position);
-            Destroy(gameObject);
+            StartCoroutine(StickToTilemap(normal));
         }
     }
 
-    private void PlaySound(AudioClip clip, Vector3 position)
+    private IEnumerator StickToTilemap(Vector2 normal)
     {
-        GameObject soundObject = new GameObject("ArrowSound");
-        soundObject.transform.position = position;
-        AudioSource audioSource = soundObject.AddComponent<AudioSource>();
-        audioSource.clip = clip;
-        audioSource.volume = hitSoundVolume;
+        isStuck = true;
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+
+        if (normal != Vector2.zero)
+        {
+            transform.position += (Vector3)(normal * -0.1f);
+        }
+        else
+        {
+            transform.position += (Vector3)(rb.linearVelocity.normalized * 0.1f);
+        }
+
+        audioSource.volume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+        audioSource.spatialBlend = 0f;
         audioSource.Play();
-        Destroy(soundObject, clip.length);
+
+        yield return new WaitForSeconds(1f);
+        Destroy(gameObject);
     }
 }
