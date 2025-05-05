@@ -28,6 +28,6 @@ public class GameManager : MonoBehaviour
 
     private void UpdateEmeraldUI()
     {
-        emeraldCountText.text = $"x {emeraldCount}";
+        emeraldCountText.text = $" * {emeraldCount}";
     }
 }
