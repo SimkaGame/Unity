@@ -14,24 +14,34 @@ public class PlayerController : MonoBehaviour
     private float originalSpeed;
     private bool facingRight;
     private bool isGrounded;
+    private bool isTeleporting;
 
     public float HorizontalMove => horizontalMove;
     public bool IsGrounded => isGrounded;
     public bool FacingRight { get => facingRight; set => facingRight = value; }
+    public bool IsTeleporting { get => isTeleporting; set => isTeleporting = value; }
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<PlayerAnimator>();
         originalSpeed = speed;
+        isTeleporting = false;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        if (!isTeleporting)
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
 
-        horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
+            horizontalMove = Input.GetAxisRaw("Horizontal") * speed;
+        }
+        else
+        {
+            horizontalMove = 0f;
+        }
 
         if ((horizontalMove < 0 && FacingRight) || (horizontalMove > 0 && !FacingRight)) Flip();
 
