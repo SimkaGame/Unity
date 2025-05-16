@@ -25,7 +25,8 @@ public class PlayerHealth : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         damageFlash = GetComponent<DamageFlash>();
         audioController = GetComponent<PlayerAudioController>();
-        currentHealth = maxHealth;
+
+        currentHealth = GameManager.Instance != null ? GameManager.Instance.GetPlayerHealth() : maxHealth;
         InitializeHearts();
     }
 
@@ -81,6 +82,7 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth <= 0) return;
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
+        GameManager.Instance?.SetPlayerHealth(currentHealth);
         UpdateHearts();
 
         if (!isFromTrap)
@@ -104,11 +106,24 @@ public class PlayerHealth : MonoBehaviour
     {
         transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
         currentHealth = maxHealth;
+        GameManager.Instance?.SetPlayerHealth(currentHealth);
         airTime = 0f;
         UpdateHearts();
     }
 
-    public void Heal(int amount) => currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-    public void ResetHealth() => currentHealth = maxHealth;
+    public void Heal(int amount)
+    {
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        GameManager.Instance?.SetPlayerHealth(currentHealth);
+        UpdateHearts();
+    }
+
+    public void ResetHealth()
+    {
+        currentHealth = maxHealth;
+        GameManager.Instance?.SetPlayerHealth(currentHealth);
+        UpdateHearts();
+    }
+
     public void ResetAirTime() => airTime = 0f;
 }
