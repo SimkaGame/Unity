@@ -5,15 +5,11 @@ public class GameManagerLoader : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI emeraldCountText;
 
-    private void Awake()
+    private void Start()
     {
         if (GameManager.Instance != null && emeraldCountText != null)
         {
             GameManager.Instance.SetEmeraldCountText(emeraldCountText);
-        }
-        else
-        {
-            Debug.LogWarning($"GameManagerLoader: GameManager.Instance or emeraldCountText is null on {gameObject.scene.name}");
         }
     }
 }

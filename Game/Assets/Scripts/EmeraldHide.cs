@@ -3,11 +3,22 @@ using UnityEngine;
 public class EmeraldHide : MonoBehaviour
 {
     [SerializeField] private AudioSource audioSource;
+    [SerializeField] private string emeraldId; // Уникальный ID изумруда
     private bool isPicked;
 
-    private void Start()
+    private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+
+        // Если ID не задан, используем имя объекта + сцену
+        if (string.IsNullOrEmpty(emeraldId))
+            emeraldId = $"{gameObject.name}_{gameObject.scene.name}";
+
+        // Проверяем, был ли изумруд уже подобран
+        if (GameManager.Instance != null && GameManager.Instance.IsEmeraldPicked(emeraldId))
+        {
+            Destroy(gameObject); // Уничтожаем, если уже подобран
+        }
     }
 
     public void TriggerPickup()
@@ -18,7 +29,7 @@ public class EmeraldHide : MonoBehaviour
         if (audioSource?.clip)
             audioSource.PlayOneShot(audioSource.clip);
 
-        GameManager.Instance.AddEmerald();
+        GameManager.Instance.AddEmerald(emeraldId);
         Destroy(gameObject, 0.5f);
     }
 

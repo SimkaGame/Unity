@@ -6,9 +6,9 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float speed = 1f;
     [SerializeField] private float jumpForce = 2f;
-    [SerializeField] public float checkGroundOffsetY = -1.8f; // Сделано публичным
-    [SerializeField] public float checkGroundRadius = 0.3f; // Сделано публичным
-    [SerializeField] public LayerMask groundLayer; // Сделано публичным для доступа из PlayerHealth
+    [SerializeField] private float checkGroundOffsetY = -1.8f;
+    [SerializeField] private float checkGroundRadius = 0.3f;
+    [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody2D rb;
     private PlayerAnimator playerAnimator;
@@ -69,14 +69,11 @@ public class PlayerController : MonoBehaviour
 
     private void CheckGround()
     {
-        Collider2D groundCollider = Physics2D.OverlapCircle(
+        isGrounded = Physics2D.OverlapCircle(
             new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), 
             checkGroundRadius, 
             groundLayer
         );
-        isGrounded = groundCollider != null;
-        if (isGrounded)
-            Debug.Log($"Grounded on: {groundCollider.gameObject.name} (Tag: {groundCollider.gameObject.tag})");
     }
 
     public void Flip()
@@ -91,31 +88,30 @@ public class PlayerController : MonoBehaviour
     public void RestoreSpeed() => speed = originalSpeed;
 
     public void Die()
+{
+    isTeleporting = true;
+    if (CheckpointManager.Instance == null)
     {
-        isTeleporting = true;
-        if (CheckpointManager.Instance == null)
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            return;
-        }
-
-        if (CheckpointManager.Instance.GetLastCheckpointScene() == SceneManager.GetActiveScene().name)
-        {
-            StartCoroutine(Respawn());
-        }
-        else
-        {
-            SceneManager.LoadScene(CheckpointManager.Instance.GetLastCheckpointScene());
-        }
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        return;
     }
 
-    private IEnumerator Respawn()
+    if (CheckpointManager.Instance.GetLastCheckpointScene() == SceneManager.GetActiveScene().name)
     {
-        rb.linearVelocity = Vector2.zero;
-        // Убрана задержка для мгновенного респавна
-        transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
-        isTeleporting = false;
-        Debug.Log($"Player respawned at: {transform.position}");
-        yield return null;
+        StartCoroutine(Respawn());
     }
+    else
+    {
+        SceneManager.LoadScene(CheckpointManager.Instance.GetLastCheckpointScene());
+    }
+}
+
+private IEnumerator Respawn()
+{
+    rb.linearVelocity = Vector2.zero;
+    yield return new WaitForSeconds(0.5f); // Короткая задержка
+    transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
+    isTeleporting = false;
+    Debug.Log($"Player respawned at: {transform.position}");
+}
 }

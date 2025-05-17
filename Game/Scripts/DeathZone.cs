@@ -8,18 +8,9 @@ public class DeathZone : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // Останавливаем движение игрока немедленно
-            Rigidbody2D rb = other.GetComponent<Rigidbody2D>();
-            if (rb)
-                rb.linearVelocity = Vector2.zero;
-
-            // Проигрываем эффекты
-            // other.GetComponent<PlayerAudioController>()?.PlayDamageSound();
-            // other.GetComponent<DamageFlash>()?.PlayFlash();
+            other.GetComponent<PlayerAudioController>()?.PlayDamageSound();
+            other.GetComponent<DamageFlash>()?.PlayFlash();
             other.GetComponent<PlayerHealth>()?.ResetAirTime();
-
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-            playerHealth?.ResetHealth(); // Сбрасываем здоровье
 
             PlayerController playerController = other.GetComponent<PlayerController>();
             if (playerController != null)
@@ -43,7 +34,7 @@ public class DeathZone : MonoBehaviour
 
     private IEnumerator RespawnPlayer(Collider2D player)
     {
-        // Убираем задержку для мгновенного респавна
+        yield return new WaitForSeconds(0.5f);
         if (CheckpointManager.Instance == null)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -62,7 +53,7 @@ public class DeathZone : MonoBehaviour
                 rb.linearVelocity = Vector2.zero;
 
             player.transform.position = checkpoint;
-            playerHealth?.ResetHealth(); // Сбрасываем здоровье (на случай, если не вызвано ранее)
+            playerHealth?.ResetHealth();
             if (playerController != null)
                 playerController.IsTeleporting = false;
 
