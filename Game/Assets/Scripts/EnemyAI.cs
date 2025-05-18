@@ -27,6 +27,7 @@ public class EnemyAI : MonoBehaviour
     private Rigidbody2D rb;
     private EnemyAudioController audioController;
     private DamageFlash damageFlash;
+    private Animator animator;
     private float lastJumpTime;
     private float lastAttackTime;
     private int currentHealth;
@@ -45,6 +46,7 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         audioController = GetComponent<EnemyAudioController>();
         damageFlash = GetComponent<DamageFlash>();
+        animator = GetComponent<Animator>();
 
         rb.gravityScale = 2f;
         rb.linearDamping = 1f;
@@ -92,6 +94,7 @@ public class EnemyAI : MonoBehaviour
             else
             {
                 rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+                animator.SetBool("isWalking", false);
                 return;
             }
         }
@@ -101,6 +104,7 @@ public class EnemyAI : MonoBehaviour
         if (!isChasing || path == null || currentWaypoint >= path.vectorPath.Count)
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            animator.SetBool("isWalking", false);
             UpdatePath();
             return;
         }
@@ -111,7 +115,6 @@ public class EnemyAI : MonoBehaviour
         var targetPos = path.vectorPath[currentWaypoint];
         var direction = ((Vector2)targetPos - currentPos).normalized;
 
-
         smoothedDirection = Vector2.Lerp(smoothedDirection, direction, Time.fixedDeltaTime * 10f);
 
         var horizontalMove = smoothedDirection.x * speed;
@@ -119,6 +122,8 @@ public class EnemyAI : MonoBehaviour
             Mathf.Lerp(rb.linearVelocity.x, horizontalMove, Time.fixedDeltaTime * 10f),
             rb.linearVelocity.y
         );
+
+        animator.SetBool("isWalking", Mathf.Abs(horizontalMove) > 0.1f);
 
         if (isGrounded && Time.time >= lastJumpTime + jumpCooldown)
         {
@@ -158,6 +163,7 @@ public class EnemyAI : MonoBehaviour
             {
                 playerHealth.TakeDamage(damage, false);
                 lastAttackTime = Time.time;
+                animator.SetTrigger("attack");
             }
         }
     }
@@ -195,13 +201,12 @@ public class EnemyAI : MonoBehaviour
     }
 
     private void OnDrawGizmos()
-{
-    var attackPos = (Vector2)transform.position + (facingRight ? attackBoxOffset : new Vector2(-attackBoxOffset.x, attackBoxOffset.y));
-    Gizmos.color = Color.red;
-    Gizmos.DrawWireCube(attackPos, attackBoxSize);
+    {
+        var attackPos = (Vector2)transform.position + (facingRight ? attackBoxOffset : new Vector2(-attackBoxOffset.x, attackBoxOffset.y));
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(attackPos, attackBoxSize);
 
-    Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position, chaseDistance);
-}
-
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, chaseDistance);
+    }
 }

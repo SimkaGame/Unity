@@ -57,6 +57,14 @@ public class PlayerShooting : MonoBehaviour
             lastShootingDirection = facingRight;
         }
 
+        if (Input.GetMouseButton(0) && canShoot && !PauseMenu.IsPaused())
+        {
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPos.z = 0;
+            facingRight = mouseWorldPos.x > transform.position.x;
+            lastShootingDirection = facingRight;
+        }
+
         if (facingRight != playerController.FacingRight)
         {
             playerController.Flip();
