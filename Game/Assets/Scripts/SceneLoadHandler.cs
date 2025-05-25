@@ -3,69 +3,67 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoadHandler : MonoBehaviour
 {
-    private bool isFirstGameLaunch = true; // Флаг для первого запуска игры
+    private bool isFirstGameLaunch = true;
+    [SerializeField] private string firstLevelScene = "Level_1";
+    [SerializeField] private string mainMenuScene = "MainMenu";
+    public static bool isTeleportTransition = false;
 
     private void Awake()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
         DontDestroyOnLoad(gameObject);
+
+        isFirstGameLaunch = !(PlayerPrefs.HasKey("LastCheckpointPosition") && PlayerPrefs.HasKey("LastCheckpointScene"));
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (scene.name == mainMenuScene)
+            return;
+
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (!player)
-        {
-            Debug.LogWarning("Player not found in scene: " + scene.name);
+        if (!player || CheckpointManager.Instance == null)
             return;
-        }
 
-        if (CheckpointManager.Instance == null)
-        {
-            Debug.LogWarning("CheckpointManager is null, cannot set checkpoint.");
-            return;
-        }
+        PlayerController pc = player.GetComponent<PlayerController>();
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+        SpriteRenderer sr = player.GetComponent<SpriteRenderer>();
 
-        // Проверяем, является ли текущая сцена первым уровнем
-        bool isFirstLevel = scene.buildIndex == 0; // Или scene.name == "Level1", если используете имя
+        if (pc) pc.IsTeleporting = false;
+        if (rb) rb.simulated = true;
+        if (sr) sr.enabled = true;
+
+        bool isFirstLevel = scene.name == firstLevelScene;
 
         if (isFirstLevel && isFirstGameLaunch)
         {
-            // Первый запуск игры на первом уровне: спавним на начальной позиции
             CheckpointManager.Instance.SetCheckpoint(player.transform.position, null, scene.name);
-            Debug.Log($"First game launch on first level, player stays at initial position: {player.transform.position}");
-            isFirstGameLaunch = false; // Сбрасываем флаг после первого спавна
+            isFirstGameLaunch = false;
+        }
+        else if (isTeleportTransition)
+        {
+            Portal spawnPortal = GameObject.FindGameObjectWithTag("SpawnPortal")?.GetComponent<Portal>() ??
+                                 Object.FindFirstObjectByType<Portal>();
+
+            Vector3 spawnPos = spawnPortal ? spawnPortal.transform.position + new Vector3(0.5f, 0.5f, 0) : player.transform.position;
+            CheckpointManager.Instance.SetCheckpoint(spawnPos, spawnPortal?.GetComponent<AudioSource>(), scene.name);
+            player.transform.position = spawnPos;
         }
         else if (CheckpointManager.Instance.GetLastCheckpointScene() == scene.name)
         {
-            // Если есть чекпоинт в текущей сцене, спавним игрока на нем
             player.transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
-            Debug.Log($"Player spawned at checkpoint: {player.transform.position}");
         }
         else
         {
-            // Иначе спавним у портала (в т.ч. при возвращении на первый уровень)
-            Portal spawnPortal = GameObject.FindGameObjectWithTag("SpawnPortal")?.GetComponent<Portal>();
-            if (spawnPortal == null)
-            {
-                spawnPortal = Object.FindFirstObjectByType<Portal>();
-            }
-
-            if (spawnPortal)
-            {
-                Vector3 spawnPosition = spawnPortal.transform.position;
-                CheckpointManager.Instance.SetCheckpoint(spawnPosition, spawnPortal.GetComponent<AudioSource>(), scene.name);
-                player.transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
-                Debug.Log($"Player spawned at portal: {player.transform.position}");
-                spawnPortal.StartCoroutine(spawnPortal.BlockTriggerForSpawn());
-            }
-            else
-            {
-                // Если портала нет, устанавливаем чекпоинт на текущей позиции игрока
-                CheckpointManager.Instance.SetCheckpoint(player.transform.position, null, scene.name);
-                Debug.Log($"No portal found, set checkpoint at player position: {player.transform.position}");
-            }
+            CheckpointManager.Instance.SetCheckpoint(player.transform.position, null, scene.name);
         }
+
+        isTeleportTransition = false;
+    }
+
+    public static void SetTeleportTransition()
+    {
+        isTeleportTransition = true;
     }
 
     private void OnDestroy()

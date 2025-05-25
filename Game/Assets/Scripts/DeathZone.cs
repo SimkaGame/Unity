@@ -1,6 +1,6 @@
 using UnityEngine;
-using System.Collections;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class DeathZone : MonoBehaviour
 {
@@ -8,31 +8,14 @@ public class DeathZone : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // Останавливаем движение игрока немедленно
-            Rigidbody2D rb = other.GetComponent<Rigidbody2D>();
-            if (rb)
-                rb.linearVelocity = Vector2.zero;
-
-            // Проигрываем эффекты
-            // other.GetComponent<PlayerAudioController>()?.PlayDamageSound();
-            // other.GetComponent<DamageFlash>()?.PlayFlash();
-            other.GetComponent<PlayerHealth>()?.ResetAirTime();
-
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-            playerHealth?.ResetHealth(); // Сбрасываем здоровье
-
             PlayerController playerController = other.GetComponent<PlayerController>();
-            if (playerController != null)
+            if (playerController)
             {
                 playerController.Die();
-                // Блокируем триггер портала на 5 секунд
-                Portal spawnPortal = GameObject.FindGameObjectWithTag("SpawnPortal")?.GetComponent<Portal>();
-                if (spawnPortal != null)
-                    spawnPortal.StartCoroutine(spawnPortal.BlockTriggerForSpawn());
             }
             else
             {
-                StartCoroutine(RespawnPlayer(other));
+                RespawnPlayer(other);
             }
         }
         else if (other.CompareTag("Enemy"))
@@ -41,35 +24,19 @@ public class DeathZone : MonoBehaviour
         }
     }
 
-    private IEnumerator RespawnPlayer(Collider2D player)
+    private void RespawnPlayer(Collider2D player)
     {
-        // Убираем задержку для мгновенного респавна
-        if (CheckpointManager.Instance == null)
+        if (!CheckpointManager.Instance)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            yield break;
+            return;
         }
 
         string checkpointScene = CheckpointManager.Instance.GetLastCheckpointScene();
         if (checkpointScene == SceneManager.GetActiveScene().name)
         {
-            Vector3 checkpoint = CheckpointManager.Instance.GetLastCheckpointPosition();
-            Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
-            PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
             PlayerController playerController = player.GetComponent<PlayerController>();
-
-            if (rb)
-                rb.linearVelocity = Vector2.zero;
-
-            player.transform.position = checkpoint;
-            playerHealth?.ResetHealth(); // Сбрасываем здоровье (на случай, если не вызвано ранее)
-            if (playerController != null)
-                playerController.IsTeleporting = false;
-
-            // Блокируем триггер портала на 5 секунд
-            Portal spawnPortal = GameObject.FindGameObjectWithTag("SpawnPortal")?.GetComponent<Portal>();
-            if (spawnPortal != null)
-                spawnPortal.StartCoroutine(spawnPortal.BlockTriggerForSpawn());
+            playerController.Die();
         }
         else
         {

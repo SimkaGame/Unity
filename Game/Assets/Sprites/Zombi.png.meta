@@ -3,35 +3,23 @@ guid: 2a75eacd00dc00544acbdfdb8da28d11
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2768476731212281188
-    second: Zombi_1_0
+      213: -5419171887376604698
+    second: Zombi_0
   - first:
-      213: 1810650164002341574
-    second: Zombi_1_1
+      213: 916599116533545514
+    second: Zombi_1
   - first:
-      213: 1547546316294548600
-    second: Zombi_1_2
+      213: -5911303446199987496
+    second: Zombi_2
   - first:
-      213: -4242158107986012874
-    second: Zombi_1_3
+      213: -7016528735474317583
+    second: Zombi_3
   - first:
-      213: -8626723645011118567
-    second: Zombi_1_4
+      213: -6886824401531980607
+    second: Zombi_4
   - first:
-      213: -8284562715047434166
-    second: Zombi_1_5
-  - first:
-      213: -3593747807655301484
-    second: Zombi_1_6
-  - first:
-      213: -2610156452357239280
-    second: Zombi_1_7
-  - first:
-      213: -7663709534539188478
-    second: Zombi_1_8
-  - first:
-      213: 3421940502969770985
-    second: Zombi_1_9
+      213: 6787329909255562923
+    second: Zombi_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -78,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 150
+  spritePixelsToUnits: 125
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -127,123 +115,101 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Zombi_1_0
+      name: Zombi_0
       rect:
         serializedVersion: 2
-        x: 22
-        y: 25
-        width: 126
-        height: 264
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 465b7d44bea9b6620800000000000000
-      internalID: 2768476731212281188
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Zombi_1_2
-      rect:
-        serializedVersion: 2
-        x: 221
-        y: 7
-        width: 138
-        height: 290
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 87c6338ec2df97510800000000000000
-      internalID: 1547546316294548600
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Zombi_1_4
-      rect:
-        serializedVersion: 2
-        x: 438
-        y: 15
-        width: 144
-        height: 276
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 91636ab1d88b74880800000000000000
-      internalID: -8626723645011118567
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Zombi_1_5
-      rect:
-        serializedVersion: 2
-        x: 657
-        y: 51
-        width: 168
-        height: 247
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a48e62aaa12570d80800000000000000
-      internalID: -8284562715047434166
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Zombi_1_6
-      rect:
-        serializedVersion: 2
-        x: 876
-        y: 43
-        width: 170
-        height: 249
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 49eed50d861702ec0800000000000000
-      internalID: -3593747807655301484
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Zombi_1_7
-      rect:
-        serializedVersion: 2
-        x: 1090
+        x: 29
         y: 18
-        width: 148
-        height: 264
+        width: 102
+        height: 213
+      alignment: 9
+      pivot: {x: 0.6872253, y: 0.49528116}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e1622461eb3bc4b0800000000000000
+      internalID: -5419171887376604698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombi_1
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 17
+        width: 108
+        height: 214
+      alignment: 9
+      pivot: {x: 0.71405, y: 0.4953032}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2a3b664a0a68bc00800000000000000
+      internalID: 916599116533545514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombi_2
+      rect:
+        serializedVersion: 2
+        x: 354
+        y: 16
+        width: 121
+        height: 216
+      alignment: 9
+      pivot: {x: 0.64951974, y: 0.49069345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d215b9c5d4d6fda0800000000000000
+      internalID: -5911303446199987496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombi_3
+      rect:
+        serializedVersion: 2
+        x: 543
+        y: 17
+        width: 141
+        height: 214
+      alignment: 9
+      pivot: {x: 0.5356419, y: 0.49060646}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f68bbd4a4840ae90800000000000000
+      internalID: -7016528735474317583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombi_4
+      rect:
+        serializedVersion: 2
+        x: 721
+        y: 14
+        width: 153
+        height: 218
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -252,8 +218,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 01e8d09298cd6cbd0800000000000000
-      internalID: -2610156452357239280
+      spriteID: 1c4b13cd1b51d60a0800000000000000
+      internalID: -6886824401531980607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombi_5
+      rect:
+        serializedVersion: 2
+        x: 891
+        y: 17
+        width: 119
+        height: 212
+      alignment: 9
+      pivot: {x: 0.58446294, y: 0.4810358}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba6ef867790713e50800000000000000
+      internalID: 6787329909255562923
       vertices: []
       indices: 
       edges: []
@@ -262,7 +250,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: df71907736f312940b362493d967d1e2
+    spriteID: e637db754e7b58b4cadaf4abd41cf791
     internalID: 0
     vertices: []
     indices: 
@@ -272,12 +260,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Zombi_1_0: 2768476731212281188
-      Zombi_1_2: 1547546316294548600
-      Zombi_1_4: -8626723645011118567
-      Zombi_1_5: -8284562715047434166
-      Zombi_1_6: -3593747807655301484
-      Zombi_1_7: -2610156452357239280
+      Zombi_0: -5419171887376604698
+      Zombi_1: 916599116533545514
+      Zombi_2: -5911303446199987496
+      Zombi_3: -7016528735474317583
+      Zombi_4: -6886824401531980607
+      Zombi_5: 6787329909255562923
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

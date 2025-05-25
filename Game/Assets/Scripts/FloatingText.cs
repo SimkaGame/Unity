@@ -28,7 +28,7 @@ public class FloatingText : MonoBehaviour
     private void Start()
 {
     Vector3 pos = transform.position;
-    pos.z = -1f; // или -5f, если камера на -10
+    pos.z = -1f;
     transform.position = pos;
 }
 

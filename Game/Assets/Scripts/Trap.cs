@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Trap : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class Trap : MonoBehaviour
         {
             isEnemyInTrap = true;
             enemy = other.gameObject;
+            enemy.GetComponent<EnemyAI>().SetIsInTrap(true);
         }
     }
 
@@ -35,56 +37,76 @@ public class Trap : MonoBehaviour
         else if (other.CompareTag("Enemy"))
         {
             isEnemyInTrap = false;
+            enemy.GetComponent<EnemyAI>().SetIsInTrap(false);
             enemy = null;
         }
     }
 
     private void Update()
     {
-        if (isPlayerInTrap && Time.time >= lastDamageTime + damageCooldown)
+        if (isPlayerInTrap && player != null && Time.time >= lastDamageTime + damageCooldown)
             ApplyDamage(player.GetComponent<Collider2D>());
 
-        if (isEnemyInTrap && Time.time >= lastDamageTime + damageCooldown)
+        if (isEnemyInTrap && enemy != null && Time.time >= lastDamageTime + damageCooldown)
             ApplyDamageToEnemy(enemy.GetComponent<Collider2D>());
     }
 
     private void ApplyDamage(Collider2D playerCollider)
-{
-    var playerHealth = playerCollider.GetComponent<PlayerHealth>();
-    if (playerHealth.CurrentHealth <= 0) return;
-
-    int predictedHealth = playerHealth.CurrentHealth - damage;
-    bool willSurvive = predictedHealth > 0;
-
-    playerHealth.TakeDamage(damage);
-    lastDamageTime = Time.time;
-
-    if (willSurvive)
     {
-        var audioController = playerCollider.GetComponent<PlayerAudioController>();
-        audioController.PlayDamageSound();
-        audioController.PlayBurnSound();
-        playerCollider.GetComponent<DamageFlash>().PlayFlash();
+        if (playerCollider == null)
+        {
+            isPlayerInTrap = false;
+            player = null;
+            return;
+        }
+
+        var playerHealth = playerCollider.GetComponent<PlayerHealth>();
+        if (playerHealth == null || playerHealth.CurrentHealth <= 0)
+        {
+            isPlayerInTrap = false;
+            player = null;
+            Debug.Log("[Trap] ApplyDamage: Игрок мертв или PlayerHealth отсутствует, урон не наносится");
+            return;
+        }
+
+        bool isLethal = playerHealth.CurrentHealth <= damage;
+
+        playerHealth.TakeDamage(damage);
+        lastDamageTime = Time.time;
+
+        if (!isLethal)
+        {
+            var audioController = playerCollider.GetComponent<PlayerAudioController>();
+            audioController.PlayDamageSound();
+            audioController.PlayBurnSound();
+            playerCollider.GetComponent<DamageFlash>().PlayFlash();
+        }
+
+        if (playerHealth.CurrentHealth <= 0)
+        {
+            isPlayerInTrap = false;
+            player = null;
+        }
     }
-
-    if (playerHealth.CurrentHealth <= 0)
-    {
-        isPlayerInTrap = false;
-        player = null;
-    }
-}
-
-
 
     private void ApplyDamageToEnemy(Collider2D enemyCollider)
     {
+        if (enemyCollider == null)
+        {
+            isEnemyInTrap = false;
+            enemy = null;
+            return;
+        }
+
         var enemyAI = enemyCollider.GetComponent<EnemyAI>();
         if (enemyAI.CurrentHealth <= 0) return;
+
+        bool isLethal = enemyAI.CurrentHealth <= damage;
 
         enemyAI.TakeDamage(damage, true);
         lastDamageTime = Time.time;
 
-        if (enemyAI.CurrentHealth > 0)
+        if (!isLethal && enemyAI.CurrentHealth > 0)
             enemyCollider.GetComponent<EnemyAudioController>().PlayBurnSound();
 
         if (enemyAI.CurrentHealth <= 0)

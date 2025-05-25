@@ -1,0 +1,351 @@
+fileFormatVersion: 2
+guid: 5080dd980009c7c4a83e116cbb84ac65
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2822089086376389075
+    second: Emerald_2_0
+  - first:
+      213: 4764499340132279987
+    second: Emerald_2_1
+  - first:
+      213: -5165984094670767068
+    second: Emerald_2_2
+  - first:
+      213: -6265076440990356711
+    second: Emerald_2_3
+  - first:
+      213: 25045250843000310
+    second: Emerald_2_4
+  - first:
+      213: 9030915575299110122
+    second: Emerald_2_5
+  - first:
+      213: 1217220206347639787
+    second: Emerald_2_6
+  - first:
+      213: -4092648331104558739
+    second: Emerald_2_7
+  - first:
+      213: 599390971642808339
+    second: Emerald_2_8
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 2500
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Emerald_2_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1706
+        width: 1001
+        height: 1294
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2657029dece5d8d0800000000000000
+      internalID: -2822089086376389075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_1
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 1702
+        width: 1138
+        height: 1446
+      alignment: 9
+      pivot: {x: 0.44976452, y: 0.49505758}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b6ea2d08e6ee1240800000000000000
+      internalID: 4764499340132279987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_2
+      rect:
+        serializedVersion: 2
+        x: 2228
+        y: 1702
+        width: 985
+        height: 1548
+      alignment: 9
+      pivot: {x: 0.31863028, y: 0.49999937}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42cb4d126dcbe48b0800000000000000
+      internalID: -5165984094670767068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_3
+      rect:
+        serializedVersion: 2
+        x: 3278
+        y: 1695
+        width: 910
+        height: 1627
+      alignment: 9
+      pivot: {x: 0.3036825, y: 0.5087838}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91be914bb2afd09a0800000000000000
+      internalID: -6265076440990356711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_4
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 58
+        width: 803
+        height: 1505
+      alignment: 9
+      pivot: {x: 0.28642294, y: 0.47151098}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fdbecfd58af85000800000000000000
+      internalID: 25045250843000310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_5
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 73
+        width: 730
+        height: 1481
+      alignment: 9
+      pivot: {x: 0.23569804, y: 0.39384824}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae4fe3e2ed1445d70800000000000000
+      internalID: 9030915575299110122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_6
+      rect:
+        serializedVersion: 2
+        x: 1692
+        y: 87
+        width: 660
+        height: 1471
+      alignment: 9
+      pivot: {x: 0.24014781, y: 0.38826877}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: beb57cc145f64e010800000000000000
+      internalID: 1217220206347639787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_7
+      rect:
+        serializedVersion: 2
+        x: 2385
+        y: 87
+        width: 684
+        height: 1449
+      alignment: 9
+      pivot: {x: 0.20747563, y: 0.49013653}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d61eae1d60ef337c0800000000000000
+      internalID: -4092648331104558739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emerald_2_8
+      rect:
+        serializedVersion: 2
+        x: 3107
+        y: 94
+        width: 654
+        height: 1438
+      alignment: 9
+      pivot: {x: 0.1831301, y: 0.39564332}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 318885ab9e6715800800000000000000
+      internalID: 599390971642808339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e81bc0e6413dfef428c5766d1f8fc7b6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Emerald_2_0: -2822089086376389075
+      Emerald_2_1: 4764499340132279987
+      Emerald_2_2: -5165984094670767068
+      Emerald_2_3: -6265076440990356711
+      Emerald_2_4: 25045250843000310
+      Emerald_2_5: 9030915575299110122
+      Emerald_2_6: 1217220206347639787
+      Emerald_2_7: -4092648331104558739
+      Emerald_2_8: 599390971642808339
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

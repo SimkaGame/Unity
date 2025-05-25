@@ -1,19 +1,18 @@
 using UnityEngine;
-using TMPro;
 
 public class GameManagerLoader : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI emeraldCountText;
+    [SerializeField] private GameObject gameManagerPrefab;
+    [SerializeField] private GameObject checkpointManagerPrefab;
 
     private void Awake()
     {
-        if (GameManager.Instance != null && emeraldCountText != null)
-        {
-            GameManager.Instance.SetEmeraldCountText(emeraldCountText);
-        }
-        else
-        {
-            Debug.LogWarning($"GameManagerLoader: GameManager.Instance or emeraldCountText is null on {gameObject.scene.name}");
-        }
+        if (!GameManager.Instance && gameManagerPrefab)
+            Instantiate(gameManagerPrefab);
+
+        if (!CheckpointManager.Instance && checkpointManagerPrefab)
+            Instantiate(checkpointManagerPrefab);
     }
+
+    private void Start() => Destroy(gameObject);
 }

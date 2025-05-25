@@ -40,7 +40,7 @@ public class Arrow : MonoBehaviour
     {
         if (target.CompareTag("Enemy") && target.TryGetComponent<EnemyAI>(out var enemy))
         {
-            enemy.TakeDamage(damage);
+            enemy.TakeDamage(damage, false);
             Destroy(gameObject);
         }
         else if (target.layer == LayerMask.NameToLayer("Ground") && audioSource != null && audioSource.clip != null)

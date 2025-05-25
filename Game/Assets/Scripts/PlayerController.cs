@@ -6,9 +6,9 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float speed = 1f;
     [SerializeField] private float jumpForce = 2f;
-    [SerializeField] public float checkGroundOffsetY = -1.8f; // Сделано публичным
-    [SerializeField] public float checkGroundRadius = 0.3f; // Сделано публичным
-    [SerializeField] public LayerMask groundLayer; // Сделано публичным для доступа из PlayerHealth
+    [SerializeField] public float checkGroundOffsetY = -1.8f;
+    [SerializeField] public float checkGroundRadius = 0.3f;
+    [SerializeField] public LayerMask groundLayer;
 
     private Rigidbody2D rb;
     private PlayerAnimator playerAnimator;
@@ -37,7 +37,6 @@ public class PlayerController : MonoBehaviour
             CheckpointManager.Instance.GetLastCheckpointScene() == SceneManager.GetActiveScene().name)
         {
             transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
-            Debug.Log($"Player spawned at: {transform.position}");
         }
     }
 
@@ -75,8 +74,6 @@ public class PlayerController : MonoBehaviour
             groundLayer
         );
         isGrounded = groundCollider != null;
-        if (isGrounded)
-            Debug.Log($"Grounded on: {groundCollider.gameObject.name} (Tag: {groundCollider.gameObject.tag})");
     }
 
     public void Flip()
@@ -110,12 +107,18 @@ public class PlayerController : MonoBehaviour
     }
 
     private IEnumerator Respawn()
+{
+    rb.linearVelocity = Vector2.zero;
+    transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
+    isTeleporting = false;
+
+    foreach (var portal in Object.FindObjectsByType<Portal>(FindObjectsSortMode.None))
+
     {
-        rb.linearVelocity = Vector2.zero;
-        // Убрана задержка для мгновенного респавна
-        transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
-        isTeleporting = false;
-        Debug.Log($"Player respawned at: {transform.position}");
-        yield return null;
+        portal.ResetTriggerCooldown();
     }
+
+    yield return null;
+}
+
 }

@@ -65,14 +65,12 @@ public class PauseMenu : MonoBehaviour
     }
 
     public static bool IsPaused() => FindFirstObjectByType<PauseMenu>().isPaused;
-
     public void ExitGame()
     {
-        Application.Quit();
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
+
 
     private void SetSFXVolume(float volume)
     {

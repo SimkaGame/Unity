@@ -36,6 +36,7 @@ public class EnemyAI : MonoBehaviour
     private bool facingRight;
     private bool isChasing;
     private bool isGrounded;
+    private bool isInTrap;
     private Vector2 smoothedDirection;
 
     public int CurrentHealth => currentHealth;
@@ -170,6 +171,11 @@ public class EnemyAI : MonoBehaviour
 
     public void TakeDamage(int damage, bool isFromTrap = false)
     {
+        if (!isFromTrap && isInTrap)
+        {
+            return;
+        }
+
         currentHealth -= damage;
 
         if (currentHealth <= 0)
@@ -180,11 +186,20 @@ public class EnemyAI : MonoBehaviour
         else
         {
             if (isFromTrap)
-                audioController?.PlayDamageSound();
+            {
+                audioController?.PlayBurnSound();
+            }
             else
+            {
                 audioController?.PlayHitSound();
+            }
             damageFlash?.PlayFlash();
         }
+    }
+
+    public void SetIsInTrap(bool value)
+    {
+        isInTrap = value;
     }
 
     private void Flip()

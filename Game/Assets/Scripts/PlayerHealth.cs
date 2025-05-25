@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
-[ExecuteInEditMode]
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 10;
@@ -17,6 +17,7 @@ public class PlayerHealth : MonoBehaviour
     private PlayerController playerController;
     private DamageFlash damageFlash;
     private PlayerAudioController audioController;
+    private bool heartsInitialized;
 
     public int CurrentHealth => currentHealth;
 
@@ -27,12 +28,12 @@ public class PlayerHealth : MonoBehaviour
         audioController = GetComponent<PlayerAudioController>();
 
         currentHealth = GameManager.Instance != null ? GameManager.Instance.GetPlayerHealth() : maxHealth;
+        if (currentHealth <= 0)
+        {
+            ResetHealth();
+        }
+        heartsInitialized = false;
         InitializeHearts();
-    }
-
-    private void Update()
-    {
-        if (!Application.isPlaying && heartImages == null) InitializeHearts();
     }
 
     private void FixedUpdate()
@@ -57,10 +58,22 @@ public class PlayerHealth : MonoBehaviour
 
     private void InitializeHearts()
     {
+        if (heartsInitialized)
+        {
+            UpdateHearts();
+            return;
+        }
+
         foreach (Transform child in heartsContainer)
         {
-            if (Application.isPlaying) Destroy(child.gameObject);
-            else DestroyImmediate(child.gameObject);
+            if (Application.isPlaying)
+            {
+                Destroy(child.gameObject);
+            }
+            else
+            {
+                DestroyImmediate(child.gameObject);
+            }
         }
 
         heartImages = new Image[maxHealth];
@@ -68,18 +81,28 @@ public class PlayerHealth : MonoBehaviour
         {
             GameObject heart = Instantiate(heartPrefab, heartsContainer);
             heartImages[i] = heart.GetComponent<Image>();
+            if (heartImages[i] == null)
+            {
+                continue;
+            }
             heartImages[i].enabled = true;
 
             RectTransform heartRect = heart.GetComponent<RectTransform>();
-            heartRect.anchoredPosition = new Vector2(15 + i * 45, -15);
+            heartRect.anchoredPosition = new Vector2(15 + i * 50, -15);
+            heartRect.sizeDelta = new Vector2(45, 45);
+            heartRect.localScale = Vector3.one;
         }
 
+        heartsInitialized = true;
         UpdateHearts();
     }
 
     public void TakeDamage(int damage, bool isFromTrap = true)
     {
-        if (currentHealth <= 0) return;
+        if (currentHealth <= 0)
+        {
+            return;
+        }
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
         GameManager.Instance?.SetPlayerHealth(currentHealth);
@@ -91,24 +114,10 @@ public class PlayerHealth : MonoBehaviour
             audioController.PlayDamageSound();
         }
 
-        if (currentHealth <= 0) Respawn();
-    }
-
-    private void UpdateHearts()
-    {
-        for (int i = 0; i < heartImages.Length; i++)
+        if (currentHealth <= 0)
         {
-            heartImages[i].enabled = i < currentHealth;
+            Respawn();
         }
-    }
-
-    private void Respawn()
-    {
-        transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
-        currentHealth = maxHealth;
-        GameManager.Instance?.SetPlayerHealth(currentHealth);
-        airTime = 0f;
-        UpdateHearts();
     }
 
     public void Heal(int amount)
@@ -122,8 +131,46 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         GameManager.Instance?.SetPlayerHealth(currentHealth);
+        heartsInitialized = false;
+        InitializeHearts();
         UpdateHearts();
     }
 
-    public void ResetAirTime() => airTime = 0f;
+    public void ResetAirTime()
+    {
+        airTime = 0f;
+    }
+
+    private void UpdateHearts()
+    {
+        if (heartImages == null || heartImages.Length == 0)
+        {
+            InitializeHearts();
+            return;
+        }
+
+        for (int i = 0; i < heartImages.Length; i++)
+        {
+            if (heartImages[i] != null)
+            {
+                heartImages[i].enabled = i < currentHealth;
+            }
+        }
+    }
+
+    private void Respawn()
+    {
+        transform.position = CheckpointManager.Instance.GetLastCheckpointPosition();
+        currentHealth = maxHealth;
+        GameManager.Instance?.SetPlayerHealth(currentHealth);
+        airTime = 0f;
+        heartsInitialized = false;
+        InitializeHearts();
+        UpdateHearts();
+
+        foreach (var portal in Object.FindObjectsByType<Portal>(FindObjectsSortMode.None))
+        {
+            portal.ResetTriggerCooldown();
+        }
+    }
 }
