@@ -105,7 +105,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u0427\u0435\u043A\u043F\u043E\u0438\u043D\u0442"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 0a3d000df3073c04792a22cd78c0a02e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 384f3bb408b24ba4da4983e09697f07b, type: 2}
   m_sharedMaterial: {fileID: 6018483346267429608, guid: 7b469569df346e3438403e32f285427c, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
