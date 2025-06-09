@@ -1,8 +1,8 @@
 using UnityEngine;
 using Pathfinding;
 
-[RequireComponent(typeof(Seeker))]
-public class EnemyAI : MonoBehaviour
+[RequireComponent(typeof(Seeker), typeof(Rigidbody2D))]
+public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] private Transform target;
     [SerializeField] private float speed = 0.2f;
@@ -15,39 +15,29 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float jumpCheckDistance = 1f;
     [SerializeField] private float jumpHeightThreshold = 0.5f;
     [SerializeField] private float jumpCooldown = 1f;
-    [SerializeField] private int damage = 1;
-    [SerializeField] private float attackCooldown = 0.3f;
-    [SerializeField] private Vector2 attackBoxSize = new Vector2(4f, 4f);
-    [SerializeField] private Vector2 attackBoxOffset = new Vector2(1f, 0f);
-    [SerializeField] private LayerMask playerLayer;
     [SerializeField] private float chaseDistance = 15f;
-    [SerializeField] private int health = 10;
+    [SerializeField] private float chaseDistanceIncrease = 5f;
 
     private Seeker seeker;
     private Rigidbody2D rb;
-    private EnemyAudioController audioController;
-    private DamageFlash damageFlash;
-    private Animator animator;
-    private float lastJumpTime;
-    private float lastAttackTime;
-    private int currentHealth;
+    private EnemyAnimationController animationController;
+    private EnemyHealth health;
     private Path path;
     private int currentWaypoint;
     private bool facingRight;
     private bool isChasing;
     private bool isGrounded;
-    private bool isInTrap;
+    private float lastJumpTime;
     private Vector2 smoothedDirection;
 
-    public int CurrentHealth => currentHealth;
+    public bool FacingRight => facingRight;
 
     private void Start()
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
-        audioController = GetComponent<EnemyAudioController>();
-        damageFlash = GetComponent<DamageFlash>();
-        animator = GetComponent<Animator>();
+        animationController = GetComponent<EnemyAnimationController>();
+        health = GetComponent<EnemyHealth>();
 
         rb.gravityScale = 2f;
         rb.linearDamping = 1f;
@@ -59,11 +49,23 @@ public class EnemyAI : MonoBehaviour
             if (playerObj) target = playerObj.transform;
         }
 
-        currentHealth = health;
-        InvokeRepeating(nameof(UpdatePath), 0f, updatePathInterval);
-
         var col = GetComponent<Collider2D>();
         col.sharedMaterial = new PhysicsMaterial2D { friction = 0f };
+
+        health.OnDamageTaken += HandleDamageTaken;
+
+        InvokeRepeating(nameof(UpdatePath), 0f, updatePathInterval);
+    }
+
+    private void OnDestroy()
+    {
+        if (health != null)
+            health.OnDamageTaken -= HandleDamageTaken;
+    }
+
+    private void HandleDamageTaken()
+    {
+        chaseDistance += chaseDistanceIncrease;
     }
 
     private void UpdatePath()
@@ -95,7 +97,7 @@ public class EnemyAI : MonoBehaviour
             else
             {
                 rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-                animator.SetBool("isWalking", false);
+                animationController?.SetWalking(false);
                 return;
             }
         }
@@ -105,7 +107,7 @@ public class EnemyAI : MonoBehaviour
         if (!isChasing || path == null || currentWaypoint >= path.vectorPath.Count)
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-            animator.SetBool("isWalking", false);
+            animationController?.SetWalking(false);
             UpdatePath();
             return;
         }
@@ -124,7 +126,7 @@ public class EnemyAI : MonoBehaviour
             rb.linearVelocity.y
         );
 
-        animator.SetBool("isWalking", Mathf.Abs(horizontalMove) > 0.1f);
+        animationController?.SetWalking(Mathf.Abs(horizontalMove) > 0.1f);
 
         if (isGrounded && Time.time >= lastJumpTime + jumpCooldown)
         {
@@ -149,57 +151,7 @@ public class EnemyAI : MonoBehaviour
                 Flip();
         }
 
-        CheckAttack();
-    }
-
-    private void CheckAttack()
-    {
-        var attackPos = (Vector2)transform.position + (facingRight ? attackBoxOffset : new Vector2(-attackBoxOffset.x, attackBoxOffset.y));
-        var hit = Physics2D.OverlapBox(attackPos, attackBoxSize, 0f, playerLayer);
-
-        if (hit && hit.CompareTag("Player") && Time.time >= lastAttackTime + attackCooldown)
-        {
-            var playerHealth = hit.GetComponent<PlayerHealth>();
-            if (playerHealth && playerHealth.CurrentHealth > 0)
-            {
-                playerHealth.TakeDamage(damage, false);
-                lastAttackTime = Time.time;
-                animator.SetTrigger("attack");
-            }
-        }
-    }
-
-    public void TakeDamage(int damage, bool isFromTrap = false)
-    {
-        if (!isFromTrap && isInTrap)
-        {
-            return;
-        }
-
-        currentHealth -= damage;
-
-        if (currentHealth <= 0)
-        {
-            audioController?.PlayDeathSound();
-            Destroy(gameObject);
-        }
-        else
-        {
-            if (isFromTrap)
-            {
-                audioController?.PlayBurnSound();
-            }
-            else
-            {
-                audioController?.PlayHitSound();
-            }
-            damageFlash?.PlayFlash();
-        }
-    }
-
-    public void SetIsInTrap(bool value)
-    {
-        isInTrap = value;
+        GetComponent<EnemyAttack>()?.CheckAttack();
     }
 
     private void Flip()
@@ -212,15 +164,15 @@ public class EnemyAI : MonoBehaviour
 
     private void CheckGround()
     {
-        isGrounded = Physics2D.OverlapCircle(new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY), checkGroundRadius, groundLayer);
+        isGrounded = Physics2D.OverlapCircle(
+            new Vector2(transform.position.x, transform.position.y + checkGroundOffsetY),
+            checkGroundRadius,
+            groundLayer
+        );
     }
 
     private void OnDrawGizmos()
     {
-        var attackPos = (Vector2)transform.position + (facingRight ? attackBoxOffset : new Vector2(-attackBoxOffset.x, attackBoxOffset.y));
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(attackPos, attackBoxSize);
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, chaseDistance);
     }

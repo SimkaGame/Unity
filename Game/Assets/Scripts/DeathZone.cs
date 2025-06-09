@@ -20,7 +20,17 @@ public class DeathZone : MonoBehaviour
         }
         else if (other.CompareTag("Enemy"))
         {
-            Destroy(other.gameObject);
+            EnemyHealth enemyHealth = other.GetComponent<EnemyHealth>();
+            DamageFlash damageFlash = other.GetComponent<DamageFlash>();
+            if (enemyHealth)
+            {
+                damageFlash?.PlayFlash();
+                enemyHealth.TakeDamage(enemyHealth.CurrentHealth, false, false);
+            }
+            else
+            {
+                Destroy(other.gameObject);
+            }
         }
     }
 

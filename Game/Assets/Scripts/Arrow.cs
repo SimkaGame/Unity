@@ -38,9 +38,9 @@ public class Arrow : MonoBehaviour
 
     private void HandleHit(GameObject target, Vector2 normal)
     {
-        if (target.CompareTag("Enemy") && target.TryGetComponent<EnemyAI>(out var enemy))
+        if (target.CompareTag("Enemy") && target.TryGetComponent<EnemyHealth>(out var enemy))
         {
-            enemy.TakeDamage(damage, false);
+            enemy.TakeDamage(damage, false, true);
             Destroy(gameObject);
         }
         else if (target.layer == LayerMask.NameToLayer("Ground") && audioSource != null && audioSource.clip != null)

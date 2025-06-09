@@ -1,9 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class MainMenu : MonoBehaviour
 {
@@ -21,7 +20,6 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private string[] levelScenes = { "Level_1", "Level_2" };
 
     private Resolution[] resolutions;
-    private int currentResolutionIndex;
     private MusicPlayer musicPlayer;
 
     private void Awake()
@@ -36,9 +34,10 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        InitializeAudioSettings();
-        InitializeResolutions();
-        InitializeLevelSelect();
+        musicPlayer = FindFirstObjectByType<MusicPlayer>();
+        SetupSliders();
+        SetupResolutions();
+        SetupLevelSelect();
 
         mainMenuPanel.SetActive(true);
         settingsPanel.SetActive(false);
@@ -46,93 +45,69 @@ public class MainMenu : MonoBehaviour
 
     private void OnEnable()
     {
-        InitializeLevelSelect();
+        SetupLevelSelect();
     }
 
-    private void InitializeAudioSettings()
+    private void SetupSliders()
     {
-        musicPlayer = FindFirstObjectByType<MusicPlayer>();
+        masterVolumeSlider.minValue = musicVolumeSlider.minValue = 0f;
+        masterVolumeSlider.maxValue = musicVolumeSlider.maxValue = 1f;
 
-        masterVolumeSlider.minValue = 0f;
-        masterVolumeSlider.maxValue = 1f;
         float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
         masterVolumeSlider.value = sfxVolume;
         masterVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
         SetSFXVolume(sfxVolume);
 
-        musicVolumeSlider.minValue = 0f;
-        musicVolumeSlider.maxValue = 1f;
-        float musicVolume = musicPlayer ? musicPlayer.GetVolume() : PlayerPrefs.GetFloat("MusicVolume", 1f);
+        float musicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         musicVolumeSlider.value = musicVolume;
         musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
         SetMusicVolume(musicVolume);
     }
 
-    private void InitializeResolutions()
-{
-    resolutions = Screen.resolutions
-        .GroupBy(r => new { r.width, r.height })
-        .Select(g => g.OrderByDescending(r => r.refreshRateRatio).First())
-        .ToArray();
-
-    resolutionDropdown.ClearOptions();
-
-    List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
-    currentResolutionIndex = 0;
-
-    for (int i = 0; i < resolutions.Length; i++)
+    private void SetupResolutions()
     {
-        string option = $"{resolutions[i].width} x {resolutions[i].height}".ToUpper();
-        options.Add(new TMP_Dropdown.OptionData(option));
+        resolutions = Screen.resolutions;
+        resolutionDropdown.ClearOptions();
 
-        if (resolutions[i].width == Screen.currentResolution.width &&
-            resolutions[i].height == Screen.currentResolution.height)
+        int currentIndex = 0;
+        var options = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
+        for (int i = 0; i < resolutions.Length; i++)
         {
-            currentResolutionIndex = i;
+            options.Add(new TMP_Dropdown.OptionData($"{resolutions[i].width} x {resolutions[i].height}"));
+            if (resolutions[i].width == Screen.currentResolution.width && resolutions[i].height == Screen.currentResolution.height)
+                currentIndex = i;
         }
+
+        resolutionDropdown.AddOptions(options);
+        resolutionDropdown.value = PlayerPrefs.GetInt("ResolutionIndex", currentIndex);
+        resolutionDropdown.onValueChanged.AddListener(SetResolution);
     }
 
-    resolutionDropdown.AddOptions(options);
-    resolutionDropdown.value = PlayerPrefs.GetInt("ResolutionIndex", currentResolutionIndex);
-    resolutionDropdown.RefreshShownValue();
-    resolutionDropdown.onValueChanged.AddListener(SetResolution);
-}
-
-    private void InitializeLevelSelect()
+    private void SetupLevelSelect()
     {
         levelSelectDropdown.ClearOptions();
-        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
-
         int unlockedLevel = PlayerPrefs.GetInt("UnlockedLevel", 1);
-        for (int i = 0; i < levelScenes.Length && i < unlockedLevel; i++)
-        {
+        var options = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
+        for (int i = unlockedLevel - 1; i >= 0; i--)
             options.Add(new TMP_Dropdown.OptionData($"Уровень {i + 1}"));
-        }
 
         levelSelectDropdown.AddOptions(options);
-
-        int selectedLevelIndex = PlayerPrefs.GetInt("LastLevelIndex", 0);
-        selectedLevelIndex = Mathf.Clamp(selectedLevelIndex, 0, options.Count - 1);
-
-        levelSelectDropdown.onValueChanged.RemoveAllListeners();
-        levelSelectDropdown.value = selectedLevelIndex;
-        levelSelectDropdown.RefreshShownValue();
-        levelSelectDropdown.onValueChanged.AddListener(SaveSelectedLevelIndex);
+        levelSelectDropdown.value = 0;
+        PlayerPrefs.SetInt("LastLevelIndex", unlockedLevel - 1);
+        PlayerPrefs.Save();
     }
 
     private void SetSFXVolume(float volume)
     {
-        var sfxSources = Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
-        if (musicPlayer)
+        var musicSources = musicPlayer ? musicPlayer.GetComponents<AudioSource>().ToList() : new System.Collections.Generic.List<AudioSource>();
+        foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
         {
-            var musicSources = musicPlayer.GetComponents<AudioSource>();
-            sfxSources = sfxSources.Where(source => source && !musicSources.Contains(source)).ToArray();
+            if (!musicSources.Contains(source))
+                source.volume = volume;
         }
 
-        foreach (var source in sfxSources)
-        {
-            source.volume = volume;
-        }
+        foreach (var wind in FindObjectsByType<Wind>(FindObjectsSortMode.None))
+            wind.UpdateVolume();
 
         PlayerPrefs.SetFloat("SFXVolume", volume);
         PlayerPrefs.Save();
@@ -145,18 +120,18 @@ public class MainMenu : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    private void SetResolution(int resolutionIndex)
+    private void SetResolution(int index)
     {
-        Resolution resolution = resolutions[resolutionIndex];
-        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
-        PlayerPrefs.SetInt("ResolutionIndex", resolutionIndex);
+        Screen.SetResolution(resolutions[index].width, resolutions[index].height, Screen.fullScreen);
+        PlayerPrefs.SetInt("ResolutionIndex", index);
         PlayerPrefs.Save();
     }
 
     private void PlayGame()
     {
-        int levelIndex = PlayerPrefs.GetInt("LastLevelIndex", 0);
-        SceneManager.LoadScene(levelScenes[levelIndex]);
+        int dropdownIndex = levelSelectDropdown.value;
+        int unlockedLevel = PlayerPrefs.GetInt("UnlockedLevel", 1);
+        SceneManager.LoadScene(levelScenes[unlockedLevel - 1 - dropdownIndex]);
     }
 
     private void ExitGame()
@@ -177,9 +152,10 @@ public class MainMenu : MonoBehaviour
         mainMenuPanel.SetActive(true);
     }
 
-    private void SaveSelectedLevelIndex(int index)
+    private void SaveSelectedLevelIndex(int dropdownIndex)
     {
-        PlayerPrefs.SetInt("LastLevelIndex", index);
+        int unlockedLevel = PlayerPrefs.GetInt("UnlockedLevel", 1);
+        PlayerPrefs.SetInt("LastLevelIndex", unlockedLevel - 1 - dropdownIndex);
         PlayerPrefs.Save();
     }
 
@@ -190,20 +166,23 @@ public class MainMenu : MonoBehaviour
         CheckpointManager.Instance?.ResetCheckpoint();
         PlayerPrefs.SetInt("UnlockedLevel", 1);
         PlayerPrefs.SetInt("LastLevelIndex", 0);
+        PlayerPrefs.SetFloat("SFXVolume", 1f);
+        PlayerPrefs.SetFloat("MusicVolume", 1f);
         PlayerPrefs.Save();
-        InitializeLevelSelect();
+        SetupLevelSelect();
+        SetupSliders();
     }
 
     private void OnDestroy()
     {
-        playButton.onClick.RemoveListener(PlayGame);
-        exitButton.onClick.RemoveListener(ExitGame);
-        settingsButton.onClick.RemoveListener(OpenSettings);
-        resetProgressButton.onClick.RemoveListener(ResetProgress);
-        backButton.onClick.RemoveListener(CloseSettings);
-        masterVolumeSlider.onValueChanged.RemoveListener(SetSFXVolume);
-        musicVolumeSlider.onValueChanged.RemoveListener(SetMusicVolume);
-        resolutionDropdown.onValueChanged.RemoveListener(SetResolution);
-        levelSelectDropdown.onValueChanged.RemoveListener(SaveSelectedLevelIndex);
+        playButton.onClick.RemoveAllListeners();
+        exitButton.onClick.RemoveAllListeners();
+        settingsButton.onClick.RemoveAllListeners();
+        resetProgressButton.onClick.RemoveAllListeners();
+        backButton.onClick.RemoveAllListeners();
+        masterVolumeSlider.onValueChanged.RemoveAllListeners();
+        musicVolumeSlider.onValueChanged.RemoveAllListeners();
+        resolutionDropdown.onValueChanged.RemoveAllListeners();
+        levelSelectDropdown.onValueChanged.RemoveAllListeners();
     }
 }

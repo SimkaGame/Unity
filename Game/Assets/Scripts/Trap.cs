@@ -23,7 +23,7 @@ public class Trap : MonoBehaviour
         {
             isEnemyInTrap = true;
             enemy = other.gameObject;
-            enemy.GetComponent<EnemyAI>().SetIsInTrap(true);
+            enemy.GetComponent<EnemyHealth>().SetIsInTrap(true);
         }
     }
 
@@ -37,7 +37,7 @@ public class Trap : MonoBehaviour
         else if (other.CompareTag("Enemy"))
         {
             isEnemyInTrap = false;
-            enemy.GetComponent<EnemyAI>().SetIsInTrap(false);
+            enemy.GetComponent<EnemyHealth>().SetIsInTrap(false);
             enemy = null;
         }
     }
@@ -65,7 +65,6 @@ public class Trap : MonoBehaviour
         {
             isPlayerInTrap = false;
             player = null;
-            Debug.Log("[Trap] ApplyDamage: Игрок мертв или PlayerHealth отсутствует, урон не наносится");
             return;
         }
 
@@ -98,18 +97,18 @@ public class Trap : MonoBehaviour
             return;
         }
 
-        var enemyAI = enemyCollider.GetComponent<EnemyAI>();
-        if (enemyAI.CurrentHealth <= 0) return;
+        var enemyHealth = enemyCollider.GetComponent<EnemyHealth>();
+        if (enemyHealth == null || enemyHealth.CurrentHealth <= 0) return;
 
-        bool isLethal = enemyAI.CurrentHealth <= damage;
+        bool isLethal = enemyHealth.CurrentHealth <= damage;
 
-        enemyAI.TakeDamage(damage, true);
+        enemyHealth.TakeDamage(damage, true, false);
         lastDamageTime = Time.time;
 
-        if (!isLethal && enemyAI.CurrentHealth > 0)
+        if (!isLethal && enemyHealth.CurrentHealth > 0)
             enemyCollider.GetComponent<EnemyAudioController>().PlayBurnSound();
 
-        if (enemyAI.CurrentHealth <= 0)
+        if (enemyHealth.CurrentHealth <= 0)
         {
             isEnemyInTrap = false;
             enemy = null;

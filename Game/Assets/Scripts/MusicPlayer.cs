@@ -20,10 +20,8 @@ public class MusicPlayer : MonoBehaviour
     {
         sourceA = gameObject.AddComponent<AudioSource>();
         sourceB = gameObject.AddComponent<AudioSource>();
-        sourceA.playOnAwake = false;
-        sourceB.playOnAwake = false;
-        sourceA.loop = false;
-        sourceB.loop = false;
+        sourceA.playOnAwake = sourceB.playOnAwake = false;
+        sourceA.loop = sourceB.loop = false;
 
         currentSource = sourceA;
         nextSource = sourceB;
@@ -31,7 +29,8 @@ public class MusicPlayer : MonoBehaviour
 
     private void Start()
     {
-        if (musicTracks.Length == 0) return;
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "MainMenu" || musicTracks.Length == 0)
+            return;
 
         maxVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         SetVolume(maxVolume);
@@ -40,53 +39,55 @@ public class MusicPlayer : MonoBehaviour
 
     private void PlayNextTrack()
     {
-        if (musicTracks.Length == 0 || isFading) return;
+        if (isFading || musicTracks.Length == 0)
+            return;
 
-        do
-        {
-            currentIndex = Random.Range(0, musicTracks.Length);
-        } while (musicTracks.Length > 1 && currentIndex == previousIndex);
-
+        currentIndex = Random.Range(0, musicTracks.Length);
+        currentIndex = musicTracks.Length > 1 && currentIndex == previousIndex ? (currentIndex + 1) % musicTracks.Length : currentIndex;
         previousIndex = currentIndex;
+
+        if (musicTracks[currentIndex] == null)
+            return;
 
         nextSource.clip = musicTracks[currentIndex];
         nextSource.volume = 0f;
         nextSource.Play();
 
-        StartCoroutine(Crossfade(currentSource, nextSource));
-
-        float nextDelay = Mathf.Max(musicTracks[currentIndex].length - fadeTime, musicTracks[currentIndex].length * 0.9f);
-        Invoke(nameof(PlayNextTrack), nextDelay);
+        StartCoroutine(Crossfade());
+        Invoke(nameof(PlayNextTrack), Mathf.Max(musicTracks[currentIndex].length - fadeTime, musicTracks[currentIndex].length * 0.9f));
     }
 
-    private IEnumerator Crossfade(AudioSource from, AudioSource to)
+    private IEnumerator Crossfade()
     {
         isFading = true;
         float t = 0f;
-        float startVolumeFrom = from.volume;
+        float startVolume = currentSource.volume;
 
         while (t < fadeTime)
         {
             t += Time.unscaledDeltaTime;
             float normalized = t / fadeTime;
-            from.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
-            to.volume = Mathf.Lerp(0f, maxVolume, normalized);
+            currentSource.volume = Mathf.Lerp(startVolume, 0f, normalized);
+            nextSource.volume = Mathf.Lerp(0f, maxVolume, normalized);
             yield return null;
         }
 
-        from.Stop();
-        from.volume = 0f;
-        to.volume = maxVolume;
+        currentSource.Stop();
+        currentSource.volume = 0f;
+        nextSource.volume = maxVolume;
 
-        (currentSource, nextSource) = (to, from);
+        (currentSource, nextSource) = (nextSource, currentSource);
         isFading = false;
     }
 
     public void SetVolume(float volume)
     {
         maxVolume = Mathf.Clamp01(volume);
-        if (!isFading) currentSource.volume = maxVolume;
-        if (!isFading) nextSource.volume = 0f;
+        if (!isFading)
+        {
+            currentSource.volume = maxVolume;
+            nextSource.volume = 0f;
+        }
         PlayerPrefs.SetFloat("MusicVolume", maxVolume);
         PlayerPrefs.Save();
     }

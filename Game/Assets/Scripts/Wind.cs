@@ -14,18 +14,11 @@ public class Wind : MonoBehaviour
 
     private void Awake()
     {
-        AudioSource[] sources = gameObject.GetComponents<AudioSource>();
-        
-
-        sourceA = sources[0];
-        sourceB = sources[1];
-
-        sourceA.playOnAwake = false;
-        sourceB.playOnAwake = false;
-        sourceA.loop = false;
-        sourceB.loop = false;
-        sourceA.clip = windClip;
-        sourceB.clip = windClip;
+        sourceA = gameObject.AddComponent<AudioSource>();
+        sourceB = gameObject.AddComponent<AudioSource>();
+        sourceA.playOnAwake = sourceB.playOnAwake = false;
+        sourceA.loop = sourceB.loop = false;
+        sourceA.clip = sourceB.clip = windClip;
 
         currentSource = sourceA;
         nextSource = sourceB;
@@ -33,11 +26,7 @@ public class Wind : MonoBehaviour
 
     private void Start()
     {
-        if (sourceA == null || sourceB == null) return;
-
-        float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
-        currentSource.volume = sfxVolume * maxVolume;
-        nextSource.volume = 0f;
+        UpdateVolume();
         currentSource.Play();
         Invoke(nameof(PlayNextCycle), windClip.length);
     }
@@ -53,14 +42,14 @@ public class Wind : MonoBehaviour
     private IEnumerator Crossfade()
     {
         float t = 0f;
-        float startVolumeFrom = currentSource.volume;
+        float startVolume = currentSource.volume;
         float targetVolume = PlayerPrefs.GetFloat("SFXVolume", 1f) * maxVolume;
 
         while (t < fadeTime)
         {
             t += Time.unscaledDeltaTime;
             float normalized = t / fadeTime;
-            currentSource.volume = Mathf.Lerp(startVolumeFrom, 0f, normalized);
+            currentSource.volume = Mathf.Lerp(startVolume, 0f, normalized);
             nextSource.volume = Mathf.Lerp(0f, targetVolume, normalized);
             yield return null;
         }
@@ -70,5 +59,11 @@ public class Wind : MonoBehaviour
         nextSource.volume = targetVolume;
 
         (currentSource, nextSource) = (nextSource, currentSource);
+    }
+
+    public void UpdateVolume()
+    {
+        currentSource.volume = PlayerPrefs.GetFloat("SFXVolume", 1f) * maxVolume;
+        nextSource.volume = 0f;
     }
 }
